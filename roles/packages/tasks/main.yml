@@ -1,0 +1,4 @@
+---
+
+- import_tasks: disable_automatic_upgrades.yml
+- import_tasks: upgrades.yml

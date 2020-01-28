@@ -1,0 +1,31 @@
+---
+
+- name: Install redhat-lsb on Amazon Linux 1/CentOS 7+/RHEL 7
+  package:
+    name: redhat-lsb
+    state: present
+  when: >
+    (ansible_distribution == 'Amazon' and ansible_distribution_version == 'NA') or
+    (ansible_distribution == 'CentOS' and ansible_distribution_major_version | int >= 7) or
+    (ansible_distribution == 'RedHat' and ansible_distribution_major_version == '7')
+
+- name: Install system-lsb on Amazon Linux 2
+  package:
+    name: system-lsb
+    state: present
+  when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2'
+
+- name: Reread ansible_lsb facts
+  setup: filter=ansible_lsb*
+  when: ansible_distribution == 'Amazon' or ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- set_fact:
+    is_amazon_linux_1: '{{ ansible_lsb.id == "AmazonAMI" and ansible_lsb.codename == "n/a" }}'
+    is_amazon_linux_2: '{{ ansible_lsb.id == "Amazon" and ansible_lsb.codename == "Karoo" }}'
+    timesync_service:  '{{ "chronyd" if ansible_os_family == "RedHat" else "systemd-timesyncd" }}.service'
+
+# Ensure facts are defined
+- set_fact:
+    is_amazon_linux_1: '{{ is_amazon_linux_1 | default(False) }}'
+    is_amazon_linux_2: '{{ is_amazon_linux_2 | default(False) }}'
+    is_sysv_based: '{{ ansible_service_mgr == "sysvinit" or ansible_service_mgr == "upstart" }}'

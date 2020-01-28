@@ -1,0 +1,10 @@
+---
+
+- name: Wait for cloud init to finish
+  cloud_init_data_facts:
+    filter: status
+  register: res
+  until: "res.cloud_init_data_facts.status.v1.stage is defined and not res.cloud_init_data_facts.status.v1.stage"
+  retries: 30
+  delay: 10
+  when: "'amazon' in ansible_bios_version"

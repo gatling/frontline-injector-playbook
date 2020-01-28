@@ -1,0 +1,28 @@
+---
+
+- name: Add pam_limits.so to common-session file
+  lineinfile:
+    dest: /etc/pam.d/common-session
+    line: 'session    required     pam_limits.so'
+  when: ansible_os_family == 'Debian'
+
+- name: Add pam_limits.so to sshd file
+  lineinfile:
+    dest: /etc/pam.d/sshd
+    line: 'session    required     pam_limits.so'
+  when: ansible_os_family == 'RedHat'
+
+- name: Add /etc/sysctl.d/99-gatling.conf
+  copy:
+    src: sysctl.conf
+    dest: /etc/sysctl.d/99-gatling.conf
+
+- name: Apply /etc/sysctl.d/99-gatling.conf to make sure limits can be changed
+  command: sysctl -p /etc/sysctl.d/99-gatling.conf
+
+- name: Update limits.conf
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      *              soft     nofile          1048576
+      *              hard     nofile          1048576

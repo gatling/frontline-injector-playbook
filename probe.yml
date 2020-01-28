@@ -1,0 +1,15 @@
+---
+
+- hosts: all
+  vars:
+    install_path: /opt
+    java:
+      set_default: True
+      type: jre
+  roles:
+    - wait-cloud-init
+    - wait-package-manager
+    - compatibility
+    - system
+    - packages
+    - java

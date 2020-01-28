@@ -1,0 +1,10 @@
+---
+
+- name: Wait for yum lock release (Ansible 2.8.0 workaround)
+  shell: ps -aux | grep yum
+  register: yum_lock
+  retries: 20
+  delay: 6
+  until: yum_lock.stdout_lines|length <= 2
+  changed_when: false
+  when: "ansible_version.full is version_compare('2.8', '>=')"

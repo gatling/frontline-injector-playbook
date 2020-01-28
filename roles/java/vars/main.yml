@@ -1,0 +1,4 @@
+---
+
+adoptopenjdk_api_url: 'https://api.adoptopenjdk.net/v2/latestAssets/releases/openjdk{{ adoptopenjdk_major }}?release=latest&openjdk_impl=hotspot'
+adoptopenjdk_api_query: '[?os == `linux` && architecture == `x64` && binary_type == `{{java.type}}`]'
