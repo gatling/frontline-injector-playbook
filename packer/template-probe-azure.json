@@ -1,0 +1,49 @@
+{
+  "builders": [{
+    "type": "azure-arm",
+    "subscription_id": "{{ user `subscription_id` }}",
+    "client_id": "{{ user `client_id` }}",
+    "client_cert_path": "{{ user `client_cert_path` }}",
+    "location": "{{ user `location` }}",
+    "image_publisher": "Debian",
+    "image_offer": "debian-10",
+    "image_sku": "10-backports",
+    "vm_size": "Standard_D2_v3",
+    "resource_group_name": "{{ user `resource_group` }}",
+    "storage_account": "{{ user `storage_account` }}",
+    "capture_container_name": "openjdk{{ user `java_major` }}",
+    "capture_name_prefix": "OpenJDK{{ user `java_version` }}",
+    "os_type": "Linux",
+    "ssh_username": "{{ user `ssh_username` }}",
+    "ssh_private_key_file": "{{ user `ssh_private_key_file` }}"
+  }],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "../probe.yml",
+      "user": "azure-user",
+      "ansible_env_vars": ["ANSIBLE_HOST_KEY_CHECKING=False"],
+      "extra_arguments": [
+        "--become",
+        "--extra-vars", "install_path=/opt",
+        "--extra-vars", "adoptopenjdk_major={{ user `java_major` }}"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo find /var/log -type f -exec rm -f {} \\;",
+        "sudo find /tmp -exec rm -f \\;",
+        "sudo rm -rf /root/.ansible"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+      ],
+      "inline_shebang": "/bin/sh -x"
+    }
+  ]
+}
