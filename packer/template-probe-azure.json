@@ -8,7 +8,7 @@
     "image_publisher": "Debian",
     "image_offer": "debian-10",
     "image_sku": "10-backports",
-    "vm_size": "Standard_D2_v3",
+    "vm_size": "STANDARD_F4S_V2",
     "resource_group_name": "{{ user `resource_group` }}",
     "storage_account": "{{ user `storage_account` }}",
     "capture_container_name": "openjdk{{ user `java_major` }}",
