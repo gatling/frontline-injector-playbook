@@ -20,5 +20,13 @@
       "--extra-vars", "install_path=/opt",
       "--extra-vars", "adoptopenjdk_major={{ user `java_major` }}"
     ]
-  }]
+  }],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest-{{user `java-major`}}.json",
+      "strip_path": true,
+      "strip_time": true
+    }
+  ]
 }
