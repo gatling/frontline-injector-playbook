@@ -9,11 +9,11 @@
 
 - name: Filter latest version
   set_fact:
-    adoptopenjdk_directory_name: '{{ item.binary_type + item.release_name[3:] }}'
-    adoptopenjdk_archive_name: '{{ item.binary_name }}'
-    adoptopenjdk_archive_url: '{{ item.binary_link }}'
-    adoptopenjdk_checksum_url: '{{ item.checksum_link }}'
-  with_items: '{{ (adoptopenjdk_api_response.content | default("{}")) | from_json | json_query(adoptopenjdk_api_query) }}'
+    adoptopenjdk_directory_name: '{{ item.binary.image_type + item.release_name[3:] }}'
+    adoptopenjdk_archive_name: '{{ item.binary.package.name }}'
+    adoptopenjdk_archive_url: '{{ item.binary.package.link }}'
+    adoptopenjdk_checksum: '{{ item.binary.package.checksum }}'
+  with_items: '{{ (adoptopenjdk_api_response.content | default("[]")) | from_json | json_query(adoptopenjdk_api_query) }}'
   when: adoptopenjdk_api_response.content is defined
 
 - name: Checking if archive already present
@@ -28,7 +28,7 @@
   get_url:
     url: '{{ adoptopenjdk_archive_url }}'
     dest: '{{ install_path }}/{{ adoptopenjdk_archive_name }}'
-    checksum: 'sha256:{{ lookup("url", adoptopenjdk_checksum_url).split(" ")[0] }}'
+    checksum: 'sha256:{{ adoptopenjdk_checksum }}'
   when: adoptopenjdk_directory.stat.exists is defined and not adoptopenjdk_directory.stat.exists and adoptopenjdk_archive.stat.exists is defined and not adoptopenjdk_archive.stat.exists
   register: adoptopenjdk_downloaded
 
