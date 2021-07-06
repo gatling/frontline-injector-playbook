@@ -2,8 +2,8 @@
 
 set -eu
 
-client_cert_path="$1"
-client_id="$2"
+client_id="$1"
+client_secret="$2"
 java_major="$3"
 location="$4"
 resource_group="$5"
@@ -18,9 +18,12 @@ java_version=$(curl -Ls "${adoptopenjdk_url}" | jq -r 'map(.version_data.openjdk
 # Make sure we end up with a valid VHD name
 java_version=${java_version//+/_}
 
-# Check if client_id and subscription_id where given as files or strings
+# Check if client_id, client_secret and subscription_id where given as files or strings
 if [[ -f "$client_id" ]]; then
   client_id=$(cat "$client_id")
+fi
+if [[ -f "$client_secret" ]]; then
+  client_secret=$(cat "$client_secret")
 fi
 if [[ -f "$subscription_id" ]]; then
   subscription_id=$(cat "$subscription_id")
@@ -28,7 +31,7 @@ fi
 
 packer build \
   -var "client_id=$client_id" \
-  -var "client_cert_path=$client_cert_path" \
+  -var "client_secret=$client_secret" \
   -var "java_major=$java_major" \
   -var "java_version=$java_version" \
   -var "location=$location" \
