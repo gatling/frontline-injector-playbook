@@ -1,4 +1,4 @@
 ---
 
 adoptopenjdk_api_url: 'https://api.adoptopenjdk.net/v3/assets/latest/{{ adoptopenjdk_major }}/hotspot'
-adoptopenjdk_api_query: '[?binary.os == `linux` && binary.architecture == `x64` && binary.image_type == `{{ java.type }}`]'
+adoptopenjdk_api_query: '[?binary.os == `linux` && binary.architecture == `x64` && binary.image_type == `jdk`]'
