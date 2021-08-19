@@ -8,8 +8,12 @@ java_major="$3"
 
 copy_regions=$(aws --profile "$profile" ec2 describe-regions --query "Regions[?RegionName != '$build_region'].RegionName" --output text | tr -s '[:blank:]' ',')
 
-adoptopenjdk_url="https://api.adoptopenjdk.net/v2/latestAssets/releases/openjdk${java_major}?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&type=jdk"
-java_version=$(curl -Ls "${adoptopenjdk_url}" | jq -r 'map(.version_data.openjdk_version) | .[]')
+adoptopenjdk_url="https://api.adoptium.net/v3/assets/latest/${java_major}/hotspot"
+java_version=$(curl -Ls "${adoptopenjdk_url}" | jq -r '.[] | select(
+    (.binary.os == "linux") and
+    (.binary.architecture == "x64") and
+    (.binary.image_type == "jdk")
+  ) | .version.openjdk_version')
 
 packer build \
   -var "profile=$profile" \
