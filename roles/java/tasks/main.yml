@@ -4,7 +4,6 @@
   uri:
     url: '{{ adoptopenjdk_api_url }}'
     return_content: True
-    body_format: json
   register: adoptopenjdk_api_response
 
 - name: Filter latest version
@@ -13,7 +12,7 @@
     adoptopenjdk_archive_name: '{{ item.binary.package.name }}'
     adoptopenjdk_archive_url: '{{ item.binary.package.link }}'
     adoptopenjdk_checksum: '{{ item.binary.package.checksum }}'
-  with_items: '{{ (adoptopenjdk_api_response.content | default("[]")) | from_json | json_query(adoptopenjdk_api_query) }}'
+  with_items: '{{ adoptopenjdk_api_response.json | json_query(adoptopenjdk_api_query) }}'
   when: adoptopenjdk_api_response.content is defined
 
 - name: Checking if archive already present
