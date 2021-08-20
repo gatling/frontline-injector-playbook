@@ -5,7 +5,7 @@
     install_path: /opt
     java:
       set_default: True
-      type: jre
+      type: jdk
   roles:
     - wait-cloud-init
     - wait-package-manager
