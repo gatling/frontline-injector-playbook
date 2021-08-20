@@ -13,7 +13,7 @@
     adoptopenjdk_archive_url: '{{ item.binary.package.link }}'
     adoptopenjdk_checksum: '{{ item.binary.package.checksum }}'
   with_items: '{{ adoptopenjdk_api_response.json | json_query(adoptopenjdk_api_query) }}'
-  when: adoptopenjdk_api_response.content is defined
+  when: adoptopenjdk_api_response.json is defined
 
 - name: Checking if archive already present
   stat: path='{{ install_path }}/{{ adoptopenjdk_archive_name }}'
