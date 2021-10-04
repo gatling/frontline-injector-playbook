@@ -8,7 +8,6 @@
     "ami_regions": "{{ user `copy_regions` }}",
     "spot_price": "1",
     "spot_instance_types": ["t2.large"],
-    "profile": "{{ user `profile` }}",
     "region": "{{ user `region` }}",
     "ssh_username": "ec2-user",
     "ssh_interface": "public_ip",

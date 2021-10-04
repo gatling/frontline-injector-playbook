@@ -1,0 +1,186 @@
+name: Certified Images
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  JAVA_VERSIONS: "8,11"
+
+jobs:
+  matrix:
+    name: Setup Java versions matrix for all jobs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Setup Java versions matrix
+      id: set-matrix
+      run: echo "::set-output name=matrix::{\"java\":[${{ env.JAVA_VERSIONS }}]}"
+
+  aws:
+    name: AWS
+    needs: [matrix]
+    strategy:
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup Ansible and JMESPath
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            ansible==2.9.25
+            jmespath
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@v1
+        with:
+          packer-version: '1.7.2'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SELLER_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SELLER_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-3
+
+      - name: Get latest version of Java ${{ matrix.java }}
+        id: java-latest
+        run: |
+          latest=$(./scripts/java/latest-version.sh "${{ matrix.java }}")
+          echo "::set-output name=version::$latest"
+
+      - name: Build image from template
+        working-directory: ./packer
+        run: ./build-probe-aws.sh eu-west-3 "${{ matrix.java }}" "${{ steps.java-latest.outputs.version }}"
+
+  azure:
+    name: Azure
+    needs: [matrix]
+    strategy:
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SSH_KEYS_MOUNT_FOLDER: /tmp/volumes/azure-ssh-keys
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup Ansible and JMESPath
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            ansible==2.9.25
+            jmespath
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@v1
+        with:
+          packer-version: '1.7.2'
+
+      - name: Configure Azure SSH Key
+        run: |
+          mkdir -p "$SSH_KEYS_MOUNT_FOLDER"
+          echo "${{ secrets.AZURE_SSH_KEY }}" >> "$SSH_KEYS_MOUNT_FOLDER/ssh-key"
+          chmod 400 "$SSH_KEYS_MOUNT_FOLDER/ssh-key"
+
+      - name: Configure Azure Credentials
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
+            }
+
+      - name: Get latest version of Java ${{ matrix.java }}
+        id: java-latest
+        run: |
+          latest=$(./scripts/java/latest-version.sh "${{ matrix.java }}")
+          echo "::set-output name=version::$latest"
+
+      - name: Build image from template
+        working-directory: ./packer
+        env:
+          CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+          CLIENT_SECRET: "${{ secrets.AZURE_CLIENT_SECRET }}"
+          SSH_PRIVATE_KEY_FILE: "${{ env.SSH_KEYS_MOUNT_FOLDER }}/ssh-key"
+          SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        run: ./build-probe-azure.sh "${{ matrix.java }}" "${{ steps.java-latest.outputs.version }}"
+
+      - name: Generate SAS URLs
+        env:
+          STORAGE_ACCOUNT_NAME: injectorsst
+          STORAGE_ACCOUNT_KEY: "${{ secrets.AZURE_CERTIFIED_IMAGES_STORAGE_ACCOUNT_KEY }}"
+        run: ./scripts/azure/sas.sh "${{ steps.java-latest.outputs.version }}" > sas.txt
+
+      - name: Archive generated SAS URLs
+        uses: actions/upload-artifact@v2
+        with:
+          name: Azure Certified Images SAS URLs for Java ${{ matrix.java }} (${{ steps.java-latest.outputs.version }})
+          path: sas.txt
+
+  gcp:
+    name: GCP
+    needs: [matrix]
+    strategy:
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup Ansible and JMESPath
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            ansible==2.9.25
+            jmespath
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@v1
+        with:
+          packer-version: '1.7.2'
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          export_default_credentials: true
+          project_id: "${{ secrets.GCP_CERTIFIED_IMAGES_PROJECT_ID }}"
+          service_account_key: "${{ secrets.GCP_CERTIFIED_IMAGES_SERVICE_ACCOUNT_KEY }}"
+
+      - name: Get latest version of Java ${{ matrix.java }}
+        id: java-latest
+        run: |
+          latest=$(./scripts/java/latest-version.sh "${{ matrix.java }}")
+          echo "::set-output name=version::$latest"
+
+      - name: Build image from template
+        working-directory: ./packer
+        run: ./build-probe-gcp.sh "${{ matrix.java }}" "${{ steps.java-latest.outputs.version }}"
