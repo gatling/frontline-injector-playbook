@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup Ansible and JMESPath
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            ansible==2.9.25
+            jmespath
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@v1
+        with:
+          packer-version: '1.7.2'
+
+      - name: Ansible playbook syntax check
+        run: ansible-playbook -i localhost, probe.yml --syntax-check
+
+      - name: Packer templates syntax check
+        run: find packer -name "*.json" -print0 | xargs -0 -n1 packer validate -syntax-only

@@ -21,7 +21,7 @@
     {
       "type": "ansible",
       "playbook_file": "../probe.yml",
-      "user": "azure-user",
+      "user": "{{ user `ssh_username` }}",
       "ansible_env_vars": ["ANSIBLE_HOST_KEY_CHECKING=False"],
       "extra_arguments": [
         "--become",

@@ -1,14 +1,13 @@
 {
   "builders": [{
     "type": "googlecompute",
-    "account_file": "{{ user `account_file_location` }}",
-    "project_id": "{{ user `project` }}",
     "source_image_family": "debian-10",
-    "zone": "{{ user `zone` }}",
-    "image_name": "injector-{{ user `java_version` | clean_resource_name }}-{{timestamp}}",
+    "image_name": "injector-{{ user `java_version` | clean_resource_name }}-{{ timestamp }}",
     "image_description": "OpenJDK {{ user `java_major` }}",
     "image_family": "injector-{{ user `java_major` }}",
-    "ssh_username": "packer"
+    "project_id": "{{ user `project_id` }}",
+    "ssh_username": "{{ user `ssh_username` }}",
+    "zone": "{{ user `zone` }}"
   }],
   "provisioners": [{
     "type": "ansible",
