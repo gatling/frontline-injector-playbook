@@ -38,10 +38,10 @@ jobs:
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v1
         with:
-          packer-version: '1.7.2'
+          packer-version: '1.7.8'
 
       - name: Ansible playbook syntax check
-        run: ansible-playbook -i localhost, probe.yml --syntax-check
+        run: ansible-playbook -i localhost, ansible/probe.yml --syntax-check
 
-      - name: Packer templates syntax check
-        run: find packer -name "*.json" -print0 | xargs -0 -n1 packer validate -syntax-only
+          #      - name: Packer templates syntax check
+          #        run: find packer -name "*.json" -print0 | xargs -0 -n1 packer validate -syntax-only

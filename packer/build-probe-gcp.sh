@@ -2,20 +2,31 @@
 
 set -eu
 
+
+
+
 java_major="$1"
 java_version="$2"
+java_vendor="$3"
+java_bundle_type="${4:-$default_bundle}"
 
 project_id=$(jq -r .project_id < "$GOOGLE_APPLICATION_CREDENTIALS")
 ssh_username=google-user
 zone=europe-west1-b
+
+
+[[ "$java_vendor" != "zulu" ]]&&[[ "$java_bundle_type" != ""  ]]&& echo "java bundle type is ignored for other vendor than Zulu"
+
 
 packer build \
   -var "java_major=$java_major" \
   -var "java_version=$java_version" \
   -var "project_id=$project_id" \
   -var "ssh_username=$ssh_username" \
+  -var "java_vendor=$java_vendor" \
+  -var "java_bundle_type=$java_bundle_type" \
   -var "zone=$zone" \
-  template-probe-gcp.json
+  template-probe-gcp.localtest.json
 
 # Share custom images publicly: https://cloud.google.com/compute/docs/images/managing-access-custom-images#gcloud_4
 
@@ -30,3 +41,5 @@ else
   echo "Could not find ``manifest.json`` file."
   exit 1
 fi
+
+

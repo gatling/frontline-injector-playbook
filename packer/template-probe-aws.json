@@ -16,9 +16,15 @@
       "owners": ["amazon"],
       "filters": {
         "virtualization-type": "hvm",
-        "name": "amzn2-ami-hvm-2.0.*-x86_64-gp2",
+        "name": "{{ user `ami` }}",
         "root-device-type": "ebs"
       }
+    },
+    "tags": {
+      "JavaVersion": "{{ user `java_version` }}",
+      "JavaVendor": "{{ user `java_vendor` }}",
+      "JavaBundleType": "{{ user `java_bundle_type` }}",
+      "KernelVersion": "{{user `kernel_version`}}"
     }
   }],
   "provisioners": [{
@@ -29,7 +35,10 @@
     "extra_arguments": [
       "--become",
       "--extra-vars", "install_path=/opt",
-      "--extra-vars", "adoptopenjdk_major={{ user `java_major` }}"
+      "--extra-vars", "java_major={{ user `java_major` }}",
+      "--extra-vars", "java_version={{ user `java_version` }}",
+      "--extra-vars", "java_vendor={{ user `java_vendor` }}",
+      "--extra-vars", "java_bundle_type={{ user `java_bundle_type` }}"
     ]
   }]
 }

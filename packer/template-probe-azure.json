@@ -26,7 +26,7 @@
       "extra_arguments": [
         "--become",
         "--extra-vars", "install_path=/opt",
-        "--extra-vars", "adoptopenjdk_major={{ user `java_major` }}"
+        "--extra-vars", "java_major={{ user `java_major` }}"
       ]
     },
     {
