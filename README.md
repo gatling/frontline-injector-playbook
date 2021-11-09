@@ -1,5 +1,10 @@
 # Gatling Enterprise Injector
 
+## Executable description
+
+- build-aws-x86-zulu.sh  : build java 17 with kernel 5.10 from zulu distribution for x86_64
+- ami-snapshot-cleanup.sh: remove ami and associated snapshot on all regions
+
 ## Prerequisites
 
 * Install packer version >= 1.7.8
