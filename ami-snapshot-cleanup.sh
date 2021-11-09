@@ -5,9 +5,9 @@ AWS_CLI=$(which aws)
 
 function usage
 {
-    echo "usage: $0 --ami-description AMI-DESCRIPTION --profile AWS_PROFILE [--help]"
+    echo "usage: $0 --ami-name AMI-NAME --profile AWS_PROFILE [--help]"
     echo "   ";
-		echo "  --ami-description   : ami name in description field";
+		echo "  --ami-name          : ami name field";
 		echo "  --profile           : AWS Profile";
     echo "  --help              : This message";
 }
@@ -20,7 +20,7 @@ function parse_args
   # named args
   while [ "$1" != "" ]; do
       case "$1" in
-          --ami-description )    image_filter="$2";     shift;;
+          --ami-name )    image_filter="$2";     shift;;
           --profile )            aws_profile="$2";      shift;;
           --help )               usage;                 exit;; # quit and show usage
           * )                    args+=("$1")           # if no match, add it to the positional args

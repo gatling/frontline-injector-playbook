@@ -8,7 +8,7 @@ AWS_CLI=$(which aws)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR --copy-regions [true|false] --profile AWS_PROFILE [--help]"
+    echo "usage: $0 --java-major MAJOR --copy-regions [true|false] --profile AWS_PROFILE [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
 		echo "  --copy-regions      : true or false";
@@ -44,15 +44,14 @@ function parse_args
 
 function run
 {
-
   parse_args "$@"
 
   . lib/log.sh
-  . lib/java-latest-version.sh $java_major "x86"
+  . lib/java-latest-version.sh $java_major "arm"
 
 	build_id=`date +%s | sha1sum | cut -c -4`
 
-	log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
+	log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
 	log info "AWS profile: $aws_profile"
 	log info "OpenJDK version: $java_version"
 
@@ -70,7 +69,7 @@ function run
 	  -var "java_major=$java_major" \
 	  -var "java_version=$java_version" \
 	  -var "copy_regions=$copy_regions_list" \
-	  packer/aws-x86-zulu.pkr.hcl
+	  packer/aws-arm-zulu.pkr.hcl
 }
 
 run "$@";
