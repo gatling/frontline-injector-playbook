@@ -63,7 +63,7 @@ data "amazon-ami" "x86_64" {
 }
 
 source "amazon-ebs" "x86_64" {
-  ami_description  = "OpenJDK ${var.java_major}"
+  ami_description  = "classic-openjdk-${var.java_major}"
   ami_groups       = ["all"]
   ami_name         = replace("Gatling Enterprise Injector x86_64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
   ami_regions      = var.copy_regions
