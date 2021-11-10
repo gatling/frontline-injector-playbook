@@ -1,0 +1,3 @@
+name: AWS arm java 17
+on:
+  workflow_dispatch:
