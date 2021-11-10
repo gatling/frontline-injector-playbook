@@ -1,9 +1,17 @@
 # Gatling Enterprise Injector
 
-## Executable description
+[![AWS x86 java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml)
+[![AWS arm java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml)
+[![AWS x86 java 11](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml)
+[![AWS x86 java 8](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java8.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java8.yml)
 
-- build-aws-x86-zulu.sh  : build java 17 with kernel 5.10 from zulu distribution for x86_64
-- ami-snapshot-cleanup.sh: remove ami and associated snapshot on all regions
+## Executable content
+
+| Scripts  | Description |
+| :------------- | :------------- |
+| `build-aws-x86-zulu.sh`  | build java with kernel 5.x from Zulu distribution for x86_64  |
+| `build-aws-arm-zulu.sh`  | build java with kernel 5.x from Zulu distribution for arm |
+| `ami-snapshot-cleanup.sh`  | remove ami and associated snapshot on all regions  |
 
 ## Prerequisites
 
@@ -45,7 +53,7 @@ usage: build-aws-x86-zulu --java-major MAJOR --copy-regions [true|false] --profi
   --help              : This message
 ```
 
-* Example: building and latest release of openjdk 17 on AWS for x64 architecture and copy AMI in all regions with AWS profile seller
+* Example: building latest release of openjdk 17 on AWS for x64 architecture and copy AMI on all regions with AWS profile seller
 
 ```
 # ./build-aws-x86-zulu.sh --java-major 17 --copy-region true --profile seller
