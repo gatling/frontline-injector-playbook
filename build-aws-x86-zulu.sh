@@ -63,7 +63,11 @@ function run
 	  log info "Copy regions: $copy_regions_list"
 	fi
 
-	unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
+	if [ -f ~/.aws/config ]
+	then
+		unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
+	fi
+
 	$PACKER build \
 	  -var "aws_profile=$aws_profile" \
 	  -var "build_id=$build_id" \

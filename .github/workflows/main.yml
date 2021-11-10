@@ -1,4 +1,4 @@
-name: Certified Images
+name: CI
 
 on:
   workflow_dispatch:
