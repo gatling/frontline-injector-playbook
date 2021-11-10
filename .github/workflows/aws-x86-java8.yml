@@ -1,3 +1,42 @@
 name: AWS x86 java 8
 on:
   workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup Ansible and JMESPath
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            ansible==4.8.0
+            jmespath
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@v1
+        with:
+          packer-version: '1.7.8'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SELLER_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SELLER_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-3
+
+      - name: Build image from template
+        run: ./build-aws-x86-zulu.sh --java-major 8 --copy-regions false --profile default
