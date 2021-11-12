@@ -9,9 +9,10 @@
 
 | Scripts  | Description |
 | :------------- | :------------- |
-| `build-aws-x86-zulu.sh`  | build java with kernel 5.x from Zulu distribution for x86_64  |
-| `build-aws-arm-zulu.sh`  | build java with kernel 5.x from Zulu distribution for arm |
-| `ami-snapshot-cleanup.sh`  | remove ami and associated snapshot on all regions  |
+| `build-aws-x86-zulu.sh`  | build java with kernel 5.x from Zulu distribution for x86_64 on aws |
+| `build-aws-arm-zulu.sh`  | build java with kernel 5.x from Zulu distribution for arm on aws|
+| `build-gcp-x86-zulu.sh`  | build java with kernel 5.x from Zulu distribution for x86_64 on gcp |
+| `ami-aws-snapshot-cleanup.sh`  | remove ami and associated snapshot on all regions  |
 
 ## Prerequisites
 
@@ -81,3 +82,16 @@ usage: build-aws-x86-zulu --java-major MAJOR --copy-regions [true|false] --profi
 ]
 ...
 ```
+
+### GCP
+#### arch: x86
+
+```
+# ./build-gcp-x86-zulu.sh --help
+usage: ./build-probe-gcp-x86.sh  --java-major MAJOR --copy-regions [true|false] [--help]
+
+  --java-major        : Java major version
+  --creds-file        : credentials file path
+  --copy-regions      : true or false
+  --help              : This message
+
