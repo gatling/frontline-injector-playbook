@@ -1,0 +1,10 @@
+---
+- hosts: all
+  vars:
+    install_path: /opt
+    java:
+      set_default: True
+      type: jdk
+  roles:
+    - packages
+    - java

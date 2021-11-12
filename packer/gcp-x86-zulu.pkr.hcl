@@ -30,17 +30,17 @@ variable "build_id" {
 }
 
 variable "zone" {
-  type = string 
-  default ="europe-west1-b"
+  type    = string
+  default = "europe-west1-b"
 }
 
-variable "project_id"{
+variable "project_id" {
   type = string
 }
 
 variable "ssh_username" {
-  type = string
-    default ="google-user"
+  type    = string
+  default = "google-user"
 }
 
 # -----------------------------------------------
@@ -53,10 +53,10 @@ locals {
 
 
 source "googlecompute" "x86_64" {
-  image_description   = "classic-openjdk-${var.java_major}"
-  image_family        = "injector-${var.java_major}"
-  image_name          = "classic-openjdk-${var.java_major}"
-#  image_name          = replace("Gatling Enterprise Injector x86_64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
+  image_description = "classic-openjdk-${var.java_major}"
+  image_family      = "injector-${var.java_major}"
+  image_name        = "classic-openjdk-${var.java_major}"
+  #  image_name          = replace("Gatling Enterprise Injector x86_64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
   project_id          = "${var.project_id}"
   source_image_family = "debian-10"
   ssh_username        = "${var.ssh_username}"
