@@ -53,14 +53,14 @@ locals {
 
 
 source "googlecompute" "x86_64" {
-  image_description = "classic-openjdk-${var.java_major}"
-  image_family      = "injector-${var.java_major}"
-  image_name        = "classic-openjdk-${var.java_major}"
-  #  image_name          = replace("Gatling Enterprise Injector x86_64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
-  project_id          = "${var.project_id}"
-  source_image_family = "debian-10"
-  ssh_username        = "${var.ssh_username}"
-  zone                = "${var.zone}"
+  image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
+  image_family            = "classic-openjdk-${var.java_major}"
+  image_name              = "classic-openjdk-${var.java_major}-${var.build_id}"
+  project_id              = "${var.project_id}"
+  source_image_family     = "debian-10"
+  ssh_username            = "${var.ssh_username}"
+  zone                    = "${var.zone}"
+  image_storage_locations = ["eu"]
 }
 
 build {
@@ -74,7 +74,4 @@ build {
     use_proxy        = false
   }
 
-  post-processor "manifest" {
-    output = "manifest.json"
-  }
 }
