@@ -17,6 +17,12 @@
 ## Prerequisites
 
 * Install packer version >= 1.7.8
+
+## Manual building
+
+### AWS
+#### Prerequisites
+
 * Install aws cli with profile with ops and seller
 
 ```
@@ -39,9 +45,7 @@ aws_access_key_id = ACCESS_KEY_ID
 aws_secret_access_key = SECRET_ACCESS_KEY
 ```
 
-## Manual building
 
-### AWS
 #### arch: x86
 
 ```
@@ -84,14 +88,22 @@ usage: build-aws-x86-zulu --java-major MAJOR --copy-regions [true|false] --profi
 ```
 
 ### GCP
+#### Prerequisites
+
+* Download the credential file from 1password (GCP Packer Credentials - Gatling Enterprise Injectors)
+* Setup `GOOGLE_APPLICATION_CREDENTIALS` variable in your env
+
+```
+export GOOGLE_APPLICATION_CREDENTIALS="PATH/gcp_credentials.json"
+```
+
 #### arch: x86
 
 ```
 # ./build-gcp-x86-zulu.sh --help
-usage: ./build-probe-gcp-x86.sh  --java-major MAJOR --copy-regions [true|false] [--help]
+usage: ./build-gcp-x86-zulu.sh  --java-major MAJOR --copy-regions [true|false] [--help]
 
   --java-major        : Java major version
-  --creds-file        : credentials file path
-  --copy-regions      : true or false
+  --project-id        : GCP project id
   --help              : This message
-
+```
