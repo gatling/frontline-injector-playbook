@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Abort on error
-set -xe
+set -e
 PACKER=$(which packer)
 GCP_CLI=$(which gcloud)
 #PACKER_LOG=1
@@ -59,15 +59,16 @@ function run
 #   -var "build_id=$build_id" \
 #   ./packer/gcp-x86-zulu.pkr.hcl 
 
+  #-var "ssh_private_key_file=$AZURE_SSH_PRIVATE_KEY_FILE" \
 packer build \
-  -var "ssh_private_key_file=$AZURE_SSH_PRIVATE_KEY_FILE" \
   -var "java_major=$java_major" \
   -var "java_version=$java_version" \
+  -var "client_id=$AZURE_CLIENT_ID" \
+  -var "client_secret=$AZURE_CLIENT_SECRET" \
+  -var "subscription_id=$AZURE_SUBSCRIPTION_ID" \
+  -var "tenant_id=$AZURE_TENANT_ID" \
+  -var "build_id=$build_id" \
   packer/azure-x86-zulu.pkr.hcl
-  #-var "client_id=$AZURE_CLIENT_ID" \
-  #-var "client_secret=$AZURE_CLIENT_SECRET" \
-  #-var "subscription_id=$AZURE_SUBSCRIPTION_ID" \
-  #-var "tenant_id=$AZURE_TENANT_ID" \
 }
 
 run "$@";
