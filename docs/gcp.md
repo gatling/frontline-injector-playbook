@@ -14,7 +14,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="PATH/gcp_credentials.json"
 
 ```
 # ./build-gcp-x86-zulu.sh --help
-usage: ./build-gcp-x86-zulu.sh  --java-major MAJOR --copy-regions [true|false] [--help]
+usage: ./build-gcp-x86-zulu.sh  --java-major MAJOR --project-id PROJECT_ID [--help]
 
   --java-major        : Java major version
   --project-id        : GCP project id

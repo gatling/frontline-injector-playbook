@@ -8,7 +8,7 @@ GCP_CLI=$(which gcloud)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR --project-id [true|false] [--help]"
+    echo "usage: $0  --java-major MAJOR --project-id PROJECT_ID [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
     echo "  --project-id        : GCP project id";
