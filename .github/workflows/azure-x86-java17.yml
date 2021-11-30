@@ -1,0 +1,3 @@
+name: Azure x86 java 17
+on:
+  workflow_dispatch:
