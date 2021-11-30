@@ -49,25 +49,23 @@ variable "ssh_username" {
   type    = string
   default = "azure-user"
 }
-#
-#variable "ssh_private_key_file" {
-#  type = string
-#}
 
+variable "image_version" {
+  type = string
+}
 
 source "azure-arm" "x86_64" {
 
-  client_id              = "${var.client_id}"
-  client_secret          = "${var.client_secret}"
-  subscription_id        = "${var.subscription_id}"
-  tenant_id              = "${var.tenant_id}"
+  client_id       = "${var.client_id}"
+  client_secret   = "${var.client_secret}"
+  subscription_id = "${var.subscription_id}"
+  tenant_id       = "${var.tenant_id}"
 
-	managed_image_resource_group_name = "gatling-enterprise-injectors"
-  managed_image_name =  "classic-openjdk-${var.java_major}-${var.build_id}"
+  managed_image_resource_group_name = "gatling-enterprise-injectors"
+  managed_image_name                = "classic-openjdk-${var.java_major}-${var.build_id}"
 
-#  ssh_private_key_file = "${var.ssh_private_key_file}"
-  ssh_username         = "${var.ssh_username}"
-  location             = "${var.location}"
+  ssh_username = "${var.ssh_username}"
+  location     = "${var.location}"
 
   os_type         = "Linux"
   image_publisher = "Debian"
@@ -76,12 +74,12 @@ source "azure-arm" "x86_64" {
   vm_size         = "STANDARD_F4S_V2"
 
   shared_image_gallery_destination {
-      subscription =  "${var.subscription_id}"
-      resource_group = "gatling-enterprise-injectors"
-      gallery_name = "gallery"
-      image_name =  "classic-openjdk-${var.java_major}"
-      image_version = "${var.java_major}.0.2"
-      replication_regions = ["${var.location}"]
+    subscription        = "${var.subscription_id}"
+    resource_group      = "GatlingMarketPlace"
+    gallery_name        = "GatlingEnterpriseInjectors"
+    image_name          = "classic-openjdk-${var.java_major}"
+    image_version       = "${var.image_version}"
+    replication_regions = ["${var.location}"]
   }
 
 }
@@ -96,10 +94,10 @@ build {
       "--extra-vars", "java_major=${var.java_major}",
       "--extra-vars", "java_version=${var.java_version}",
       "--extra-vars", "java_vendor=${var.java_vendor}",
-    "--extra-vars", "java_bundle_type=${var.java_bundle_type}"]
+      "--extra-vars", "java_bundle_type=${var.java_bundle_type}"]
     playbook_file = "ansible/probe.yml"
     user          = "${var.ssh_username}"
-    use_proxy        = false
+    use_proxy     = false
   }
 
   provisioner "shell" {

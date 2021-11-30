@@ -8,9 +8,14 @@ GCP_CLI=$(which gcloud)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR --client-id CLIENT_ID --client-secret CLIENT_SECRET --ssh-private-key SSH_PRIVATE_KEY_FILE --subscription-id SUBSCRIPTION_ID [--help]"
+    echo "usage: $0  --java-major MAJOR --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
+    echo "  --client-id         : Azure Client ID";
+    echo "  --client-secret     : Azure Client Secret";
+    echo "  --subscription-id   : Azure Subscription ID";
+    echo "  --tenant-id         : Azure Tenant ID";
+    echo "  --image-version     : Azure Image Version";
     echo "  --help              : This message";
 }
 
@@ -23,6 +28,11 @@ function parse_args
   while [ "$1" != "" ]; do
       case "$1" in
           --java-major )         java_major="$2";       shift;;
+          --client-id )          client_id="$2";        shift;;
+          --client-secret )      client_secret="$2";    shift;;
+          --subscription-id )    subscription_id="$2";  shift;;
+          --tenant-id )          tenant_id="$2";        shift;;
+          --image-version )      image_version="$2";    shift;;
           --help )               usage;                 exit;; # quit and show usage
           * )                    args+=("$1")           # if no match, add it to the positional args
       esac
@@ -30,10 +40,10 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" ]]; then
+  if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" ]]; then
       echo "Invalid arguments"
       usage
-      exit;
+      exit
   fi
 
 }
@@ -46,29 +56,25 @@ function run
   . lib/log.sh
   . lib/java-latest-version.sh $java_major "x86"
 
-  build_id=`date +%s | sha1sum | cut -c -4`
+	build_id=`date +%s | sha1sum | cut -c -4`
 
-#  log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
-#  log info "Project ID: ${project_id} "
-#  log info "OpenJDK version: $java_version"
-#
-#  ${PACKER} build \
-#   -var "java_major=$java_major" \
-#   -var "java_version=$java_version" \
-#   -var "project_id=$project_id" \
-#   -var "build_id=$build_id" \
-#   ./packer/gcp-x86-zulu.pkr.hcl 
+  log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
+	log info "Image version: $image_version"
+  log info "OpenJDK version: $java_version"
+  log info "Client ID: ${client_id} "
+  log info "Subscription ID: ${subscription_id} "
+  log info "Tenant ID: ${tenant_id} "
 
-  #-var "ssh_private_key_file=$AZURE_SSH_PRIVATE_KEY_FILE" \
-packer build \
-  -var "java_major=$java_major" \
-  -var "java_version=$java_version" \
-  -var "client_id=$AZURE_CLIENT_ID" \
-  -var "client_secret=$AZURE_CLIENT_SECRET" \
-  -var "subscription_id=$AZURE_SUBSCRIPTION_ID" \
-  -var "tenant_id=$AZURE_TENANT_ID" \
-  -var "build_id=$build_id" \
-  packer/azure-x86-zulu.pkr.hcl
+	$PACKER build \
+	  -var "java_major=$java_major" \
+	  -var "java_version=$java_version" \
+	  -var "client_id=$client_id" \
+	  -var "client_secret=$client_secret" \
+	  -var "subscription_id=$subscription_id" \
+	  -var "tenant_id=$tenant_id" \
+	  -var "image_version=$image_version" \
+	  -var "build_id=$build_id" \
+	  packer/azure-x86-zulu.pkr.hcl
 }
 
 run "$@";
