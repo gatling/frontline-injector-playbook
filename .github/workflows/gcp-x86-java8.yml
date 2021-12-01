@@ -30,3 +30,14 @@ jobs:
         uses: hashicorp-contrib/setup-packer@v1
         with:
           packer-version: '1.7.8'
+
+      - name: Configure GCP Credentials
+        run: |
+          echo $ENV_FILE > creds.json;
+        shell: bash
+        env: 
+          ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
+
+      - name: Build image from template
+        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 8 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" 
+          
