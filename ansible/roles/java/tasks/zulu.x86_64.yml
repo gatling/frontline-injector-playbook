@@ -1,0 +1,64 @@
+---
+
+- name: Test task Zulu
+  debug: 
+    var: java_vendor
+
+- name: Test task Zulu
+  debug: 
+    var: ansible_architecture
+
+- name: getting package download url for X86 arch
+  uri: 
+    url: "https://api.azul.com/zulu/download/community/v1.0/bundles/?os=linux&jdk_version={{java_version | replace('+','.') }}&bundle_type={{ java_bundle_type }}&latest=true&ext=tar.gz&arch=x86&hw_bitness=64&javafx=false"
+    return_content: yes
+  register: zulu_download_url
+
+
+- name: install directory
+  file: 
+    path: "{{ install_path }}"
+    state: directory
+    recurse: yes
+
+
+- name: Download latest
+  unarchive:
+    src: "{{ zulu_download_url.json | json_query('[0].url') }}"
+    dest: "{{ install_path }}"
+    remote_src: yes
+  register: zulu_jdk_downloaded
+
+- name: show name
+  debug:
+    var: zulu_jdk_downloaded 
+
+- name: linking 
+  file:
+    src: "{{ install_path }}/{{ zulu_download_url.json | json_query('[0].url')| basename | splitext | first | splitext | first }}"
+    dest: "/{{ install_path }}/java"
+    state: link
+
+- name: Clean up downloaded archive
+  file:
+    path: "{{ install_path }}/{{ zulu_download_url.json | json_query('[0].url')| basename }}"
+    state: absent
+
+- name: Define environment variables
+  set_fact:
+    java_home: 'JAVA_HOME={{ install_path }}/java'
+
+- name: Create symbolic link to 'java' executable
+  file:
+    src: '{{ install_path }}/java/bin/java'
+    dest: /usr/bin/java
+    state: link
+    force: true
+
+- name: Create symbolic link to 'javac' executable
+  file:
+    src: '{{ install_path }}/java/bin/javac'
+    dest: /usr/bin/javac
+    state: link
+    force: true
+  when: java_bundle_type == "jdk"

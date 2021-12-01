@@ -1,3 +1,35 @@
 name: Azure x86 java 11
 on:
   workflow_dispatch:
+    inputs:
+      image_version:
+        description: 'Image version (x.x.x)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Setup Ansible and JMESPath
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            ansible==4.8.0
+            jmespath
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@v1
+        with:
+          packer-version: '1.7.8'
+
+      - name: Build image from template
+        run: ./build-azure-x86-zulu.sh  --java-major 11 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
