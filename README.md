@@ -1,11 +1,6 @@
-# Gatling Enterprise Injector
+# Gatling Enterprise Injectors
 
-[![AWS x86 java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml)
-[![AWS arm java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml)
-[![AWS x86 java 11](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml)
-[![AWS x86 java 8](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java8.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java8.yml)
-
-## Executable content
+## Content description
 
 | Scripts  | Description |
 | :------------- | :------------- |
@@ -17,15 +12,23 @@
 
 ## Prerequisites
 
-* Install packer version >= 1.7.8
+* Install `packer` version >= 1.7.8
+* Install `aws` (AWS cli)
+* Install `az` (Azure cli)
+* Install `gcloud` (GCP cli)
 
-## Github Action building
+## Build
+
+### Github Action
 
 | Action | Description | 
 | :------------- | :------------- |
-| FIXME | FIXME |
+| [![AWS x86 java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml) | FIXME |
+| [![AWS arm java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml) | FIXME |
+| [![AWS x86 java 11](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml)| FIXME |
+| [![AWS x86 java 8](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java8.yml/badge.svg?branch=install-zulu)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java8.yml) | FIXME |
 
-## Manual Building
+### Manual
 
 * [AWS](docs/aws.md)
 * [GCP](docs/gcp.md)
