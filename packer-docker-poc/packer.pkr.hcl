@@ -30,10 +30,10 @@ source "docker" "rockylinux" {
 }
 
 build {
-  sources = ["source.docker.rockylinux"]
-    provisioner "shell" {
-    script = "./scripts/install_python.sh"
-  }
+#  sources = ["source.docker.rockylinux"]
+#    provisioner "shell" {
+#    script = "./scripts/install_python.sh"
+#  }
   provisioner "ansible-local" {
     playbook_file = "../ansible/probe-conatiner-poc.yml"
     playbook_dir = "../ansible"

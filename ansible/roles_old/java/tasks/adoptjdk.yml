@@ -1,0 +1,78 @@
+---
+
+- name: Query AdoptOpenJDK API
+  uri:
+    url: '{{ adoptopenjdk_api_url }}'
+    return_content: True
+  register: adoptopenjdk_api_response
+
+- name: Filter latest version
+  set_fact:
+    adoptopenjdk_directory_name: '{{ item.binary.image_type + item.release_name[3:] }}'
+    adoptopenjdk_archive_name: '{{ item.binary.package.name }}'
+    adoptopenjdk_archive_url: '{{ item.binary.package.link }}'
+    adoptopenjdk_checksum: '{{ item.binary.package.checksum }}'
+  with_items: '{{ adoptopenjdk_api_response.json | json_query(adoptopenjdk_api_query) }}'
+  when: adoptopenjdk_api_response.json is defined
+
+- name: Checking if archive already present
+  stat: path='{{ install_path }}/{{ adoptopenjdk_archive_name }}'
+  register: adoptopenjdk_archive
+
+- name: Checking if installation directory already present
+  stat: path='{{ install_path }}/{{ adoptopenjdk_directory_name }}'
+  register: adoptopenjdk_directory
+
+- name: Download latest
+  get_url:
+    url: '{{ adoptopenjdk_archive_url }}'
+    dest: '{{ install_path }}/{{ adoptopenjdk_archive_name }}'
+    checksum: 'sha256:{{ adoptopenjdk_checksum }}'
+  when: adoptopenjdk_directory.stat.exists is defined and not adoptopenjdk_directory.stat.exists and adoptopenjdk_archive.stat.exists is defined and not adoptopenjdk_archive.stat.exists
+  register: adoptopenjdk_downloaded
+
+- name: Create installation directory
+  file:
+    path: '{{ install_path }}/{{ adoptopenjdk_directory_name }}'
+    owner: root
+    group: root
+    state: directory
+
+- name: Install latest
+  unarchive:
+    src: '{{ install_path }}/{{ adoptopenjdk_archive_name }}'
+    dest: '{{ install_path }}/{{ adoptopenjdk_directory_name }}'
+    owner: root
+    group: root
+    remote_src: True
+    extra_opts: 
+      - '--strip-components=1'
+  when: adoptopenjdk_downloaded.changed or adoptopenjdk_directory.stat.exists is defined and not adoptopenjdk_directory.stat.exists
+
+- name: Clean up downloaded archive
+  file:
+    path: '{{ install_path }}/{{ adoptopenjdk_archive_name }}'
+    state: absent
+
+- name: Make a symbolic link to new installation
+  file: src='{{ install_path }}/{{ adoptopenjdk_directory_name }}' dest='{{ install_path }}/java' state=link
+
+- name: Define environment variables
+  set_fact:
+    java_home: 'JAVA_HOME={{ install_path }}/java'
+
+- name: Create symbolic link to 'java' executable
+  file:
+    src: '{{ install_path }}/java/bin/java'
+    dest: /usr/bin/java
+    state: link
+    force: true
+  when: java.set_default | bool
+
+- name: Create symbolic link to 'javac' executable
+  file:
+    src: '{{ install_path }}/java/bin/javac'
+    dest: /usr/bin/javac
+    state: link
+    force: true
+  when: java.set_default | bool and java.type == 'jdk'

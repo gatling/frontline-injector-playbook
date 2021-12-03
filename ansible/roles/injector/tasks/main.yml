@@ -1,0 +1,23 @@
+---
+
+- name: Add pam_limits.so to common-session file
+  include: pamd.{{ansible_os_family}}.yml
+
+
+- name: Add /etc/sysctl.d/99-gatling.conf
+  copy:
+    src: sysctl.conf
+    dest: /etc/sysctl.d/99-gatling.conf
+
+      #- name: Apply /etc/sysctl.d/99-gatling.conf to make sure limits can be changed
+      #  command: sysctl -p /etc/sysctl.d/99-gatling.conf
+
+- name: applying sysctl config
+  include: sysctl.yml
+
+- name: Update limits.conf
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      *              soft     nofile          1048576
+      *              hard     nofile          1048576

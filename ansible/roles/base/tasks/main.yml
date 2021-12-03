@@ -1,0 +1,3 @@
+- import_tasks: disable_automatic_upgrades.{{ansible_distribution}}.yml
+- import_tasks: upgrades.{{ansible_distribution}}.yml
+- import_tasks: lsb.yml

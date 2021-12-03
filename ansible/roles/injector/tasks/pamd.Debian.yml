@@ -1,0 +1,7 @@
+---
+- name: Add pam_limits.so to common-session file
+  lineinfile:
+    dest: /etc/pam.d/common-session
+    line: 'session    required     pam_limits.so'
+  when: ansible_os_family == 'Debian'
+

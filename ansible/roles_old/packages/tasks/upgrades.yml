@@ -1,0 +1,30 @@
+---
+
+- name: Update all packages
+  apt: update_cache=yes
+  when: ansible_os_family == 'Debian'
+
+- name: Upgrade all packages
+  apt: upgrade=dist
+  when: ansible_os_family == 'Debian'
+
+- name: Make /var/lib/rpm-state for Amazon Linux issue on jdk7 upgrade
+  file:
+    path: /var/lib/rpm-state
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  when: ansible_distribution == 'Amazon'
+
+# On a Amazon Linux 1 instance, ansible_pkg_mgr is broken and equals `dnf` when using Ansible 2.8
+# See https://github.com/ansible/ansible/issues/56583
+- name: Temporary workaround for ansible/ansible#56583
+  set_fact:
+    ansible_facts:
+      pkg_mgr: yum
+  when: ansible_os_family == 'RedHat' and ansible_distribution == 'Amazon'
+
+- name: Upgrade all packages
+  action: '{{ ansible_facts.pkg_mgr }} name=* state=latest'
+  when: ansible_os_family == 'RedHat'

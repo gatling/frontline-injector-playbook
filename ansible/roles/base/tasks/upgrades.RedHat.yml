@@ -1,0 +1,8 @@
+---
+- name: Temporary workaround for ansible/ansible#56583
+  set_fact:
+    ansible_facts:
+      pkg_mgr: yum
+
+- name: Upgrade all packages
+  action: '{{ ansible_facts.pkg_mgr }} name=* state=latest'

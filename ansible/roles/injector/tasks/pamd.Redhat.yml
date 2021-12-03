@@ -1,0 +1,6 @@
+---
+- name: Add pam_limits.so to sshd file
+  lineinfile:
+    dest: /etc/pam.d/sshd
+    line: 'session    required     pam_limits.so'
+  when: ansible_os_family == 'RedHat'

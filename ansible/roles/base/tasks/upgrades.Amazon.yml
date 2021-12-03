@@ -1,0 +1,15 @@
+---
+- name: Make /var/lib/rpm-state for Amazon Linux issue on jdk7 upgrade
+  file:
+    path: /var/lib/rpm-state
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Temporary workaround for ansible/ansible#56583
+  set_fact:
+    ansible_facts:
+      pkg_mgr: yum
+  when: ansible_distribution == 'Amazon'
+

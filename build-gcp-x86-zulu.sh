@@ -53,6 +53,7 @@ function run
   log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
   log info "Project ID: ${project_id} "
   log info "OpenJDK version: $java_version"
+  log info "json: $GOOGLE_APPLICATION_CREDENTIALS"
 
   ${PACKER} build \
    -var "java_major=$java_major" \

@@ -1,0 +1,15 @@
+---
+- name: Disable repo upgrade on cloud config
+  lineinfile:
+    dest: /etc/cloud/cloud.cfg
+    regexp: 'repo_upgrade: (security|none)'
+    line: 'repo_upgrade: none'
+    state: present
+  when: ansible_distribution == 'Amazon'
+
+- name: Add java* to repo_upgrade exclusions
+  lineinfile:
+    path: /etc/cloud/cloud.cfg
+    insertafter: '^repo_upgrade_exclude:$'
+    line: ' - java*'
+  when: ansible_distribution == 'Amazon'
