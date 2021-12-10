@@ -61,8 +61,8 @@ source "azure-arm" "x86_64" {
   subscription_id = "${var.subscription_id}"
   tenant_id       = "${var.tenant_id}"
 
-  managed_image_resource_group_name = "gatling-enterprise-injectors"
-  managed_image_name                = "classic-openjdk-${var.java_major}-${var.build_id}"
+  managed_image_resource_group_name = "gei-prod-westeurope-rg"
+  managed_image_name                = "gei-classic-openjdk-${var.java_major}-prod-${var.build_id}-img"
 
   ssh_username = "${var.ssh_username}"
   location     = "${var.location}"
@@ -75,9 +75,9 @@ source "azure-arm" "x86_64" {
 
   shared_image_gallery_destination {
     subscription        = "${var.subscription_id}"
-    resource_group      = "GatlingMarketPlace"
-    gallery_name        = "GatlingEnterpriseInjectors"
-    image_name          = "classic-openjdk-${var.java_major}"
+    resource_group      = "gei-prod-westeurope-rg"
+    gallery_name        = "gei_prod_acg"
+    image_name          = "gei-classic-openjdk-${var.java_major}-prod-vid"
     image_version       = "${var.image_version}"
     replication_regions = ["${var.location}"]
   }
