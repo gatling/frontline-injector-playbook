@@ -61,6 +61,9 @@ function run
    -var "build_id=$build_id" \
    ./packer/gcp-x86-zulu.pkr.hcl 
 
+  export CLOUDSDK_CONFIG=$GOOGLE_APPLICATION_CREDENTIALS 
+
+
 	$GCP_CLI --project "$project_id" compute images \
     add-iam-policy-binding "classic-openjdk-${java_major}-${build_id}" \
     --member="allAuthenticatedUsers" \
