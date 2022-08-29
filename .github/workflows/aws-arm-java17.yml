@@ -2,6 +2,10 @@ name: AWS arm java 17
 on:
   workflow_dispatch:
 
+permissions:
+      id-token: write
+      contents: read
+
 defaults:
   run:
     shell: bash
@@ -34,8 +38,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_SELLER_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SELLER_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
 
       - name: Build image from template
