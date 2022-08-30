@@ -2,6 +2,10 @@ name: AWS x86 java 8
 on:
   workflow_dispatch:
 
+permissions:
+      id-token: write
+      contents: read
+
 defaults:
   run:
     shell: bash
@@ -12,7 +16,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -34,8 +38,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_SELLER_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SELLER_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
 
       - name: Build image from template
