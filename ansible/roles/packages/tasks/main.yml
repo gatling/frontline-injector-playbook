@@ -2,4 +2,4 @@
 
 - import_tasks: disable_automatic_upgrades.yml
 - import_tasks: upgrades.yml
-- import_tasks: commons_packages.yml
+- import_tasks: common_packages.yml
