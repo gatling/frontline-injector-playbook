@@ -1,0 +1,16 @@
+---
+- name: install usefull packages
+  apt:
+    name:
+      - curl
+      - jq
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: install usefull packages
+  yum:
+    name: 
+      - curl 
+      - jq
+    state: present
+  when: ansible_os_family == 'RedHat'
