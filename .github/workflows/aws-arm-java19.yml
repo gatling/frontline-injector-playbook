@@ -1,4 +1,4 @@
-name: AWS arm java 19
+name: AWS arm java 19 (latest)
 on:
   workflow_dispatch:
 
