@@ -82,7 +82,7 @@ function run
   $GCP_CLI auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
 	$GCP_CLI --project "$project_id" compute images \
-    add-iam-policy-binding "classic-openjdk-${java_major}-${build_id}" \
+    add-iam-policy-binding "$image_name" \
     --member="allAuthenticatedUsers" \
     --role="roles/compute.imageUser"
 
