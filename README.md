@@ -27,6 +27,10 @@
 
 | Action | Info | 
 | :------------- | :------------- |
+| [![AWS arm java latest](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java-latest.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java-latest.yml) | AWS AMI x86 w/ java latest |
+| [![AWS x86 java latest](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java-latest.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java-latest.yml) | AWS AMI x86 w/ java latest |
+| [![AWS arm java 19](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java19.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml) | AWS AMI x86 w/ java 19 |
+| [![AWS x86 java 19](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java19.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java19.yml) | AWS AMI x86 w/ java 19 |
 | [![AWS x86 java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java17.yml) | AWS AMI x86 w/ java 17 |
 | [![AWS arm java 17](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-arm-java17.yml) | AWS AMI arm w/ java 17 |
 | [![AWS x86 java 11](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml/badge.svg)](https://github.com/gatling/frontline-injector-playbook/actions/workflows/aws-x86-java11.yml)| AWS AMI x86 w/ java 11 |

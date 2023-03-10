@@ -1,4 +1,4 @@
-name: AWS arm java 19
+name: AWS arm java latest
 on:
   workflow_dispatch:
 
@@ -42,4 +42,4 @@ jobs:
           aws-region: eu-west-3
 
       - name: Build image from template
-        run: ./build-aws-arm-zulu.sh --java-major 19 --copy-regions true --profile default --latest false
+        run: ./build-aws-arm-zulu.sh --java-major 19 --copy-regions true --profile default --latest true

@@ -47,6 +47,10 @@ variable "build_id" {
   type = string
 }
 
+variable "ami_description" {
+  type = string
+}
+
 # -----------------------------------------------
 # Data & Sources
 # -----------------------------------------------
@@ -63,7 +67,7 @@ data "amazon-ami" "arm64" {
 }
 
 source "amazon-ebs" "arm64" {
-  ami_description  = replace("classic-openjdk-${var.java_major}", "19", "latest")
+  ami_description  = "${var.ami_description}"
   ami_groups       = ["all"]
   ami_name         = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
   ami_regions      = var.copy_regions

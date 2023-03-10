@@ -8,11 +8,12 @@ AWS_CLI=$(which aws)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR --copy-regions [true|false] --profile AWS_PROFILE [--help]"
+    echo "usage: $0 --java-major MAJOR --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
-		echo "  --copy-regions      : true or false";
-		echo "  --profile           : AWS Profile";
+    echo "  --copy-regions      : true or false";
+    echo "  --profile           : AWS Profile";
+    echo "  --latest            : Want latest ?";
     echo "  --help              : This message";
 }
 
@@ -27,6 +28,7 @@ function parse_args
           --java-major )         java_major="$2";       shift;;
           --copy-regions )       copy_regions="$2";     shift;;
           --profile )            aws_profile="$2";     shift;;
+          --latest )             latest="$2";           shift;;
           --help )               usage;                 exit;; # quit and show usage
           * )                    args+=("$1")           # if no match, add it to the positional args
       esac
@@ -34,7 +36,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" ]]; then
       echo "Invalid arguments"
       usage
       exit;
@@ -68,12 +70,21 @@ function run
 		unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
 	fi
 
+	ami_description="classic-openjdk-$java_major"
+	if [ $latest == "true" ]
+	then
+	    ami_description="classic-openjdk-latest"
+	fi
+
+	log info "AMI description: $ami_description"
+
 	$PACKER build \
 	  -var "aws_profile=$aws_profile" \
 	  -var "build_id=$build_id" \
 	  -var "java_major=$java_major" \
 	  -var "java_version=$java_version" \
 	  -var "copy_regions=$copy_regions_list" \
+	  -var "ami_description=$ami_description" \
 	  packer/aws-x86-zulu.pkr.hcl
 }
 

@@ -1,4 +1,4 @@
-name: AWS x86 java 19 (latest)
+name: AWS x86 java 19
 on:
   workflow_dispatch:
 
@@ -42,4 +42,4 @@ jobs:
           aws-region: eu-west-3
 
       - name: Build image from template
-        run: ./build-aws-x86-zulu.sh --java-major 19 --copy-regions true --profile default
+        run: ./build-aws-x86-zulu.sh --java-major 19 --copy-regions true --profile default --latest false
