@@ -43,6 +43,14 @@ variable "ssh_username" {
   default = "google-user"
 }
 
+variable "image_family" {
+  type = string
+}
+
+variable "image_name" {
+  type = string
+}
+
 # -----------------------------------------------
 # Data & Sources
 # -----------------------------------------------
@@ -54,8 +62,10 @@ locals {
 
 source "googlecompute" "x86_64" {
   image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
-  image_family            = "classic-openjdk-${var.java_major}"
-  image_name              = "classic-openjdk-${var.java_major}-${var.build_id}"
+  #image_family            = "classic-openjdk-${var.java_major}"
+  #image_name              = "classic-openjdk-${var.java_major}-${var.build_id}"
+  image_family            = "${var.image_family}"
+  image_name              = "${var.image_name}"
   project_id              = "${var.project_id}"
   source_image_family     = "debian-10"
   ssh_username            = "${var.ssh_username}"

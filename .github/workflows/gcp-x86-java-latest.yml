@@ -1,4 +1,4 @@
-name: GCP x86 java 11
+name: GCP x86 java latest
 on:
   workflow_dispatch:
 
@@ -39,5 +39,5 @@ jobs:
           ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
 
       - name: Build image from template
-        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 11 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest false
+        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 19 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest true
           
