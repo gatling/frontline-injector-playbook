@@ -1,10 +1,10 @@
-name: GCP x86 java latest
+name: Azure x86 java 20
 on:
   workflow_dispatch:
-
-defaults:
-  run:
-    shell: bash
+    inputs:
+      image_version:
+        description: 'Image version (x.x.x)'
+        required: true
 
 jobs:
   build:
@@ -31,13 +31,5 @@ jobs:
         with:
           packer-version: '1.7.8'
 
-      - name: Configure GCP Credentials
-        run: |
-          echo $ENV_FILE > creds.json;
-        shell: bash
-        env: 
-          ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
-
       - name: Build image from template
-        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 20 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest true
-          
+        run: ./build-azure-x86-zulu.sh  --java-major 20 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
