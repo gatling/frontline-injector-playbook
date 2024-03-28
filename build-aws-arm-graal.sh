@@ -27,7 +27,7 @@ function parse_args
       case "$1" in
           --java-major )         java_major="$2";       shift;;
           --copy-regions )       copy_regions="$2";     shift;;
-          --profile )            aws_profile="$2";     shift;;
+          --profile )            aws_profile="$2";      shift;;
           --latest )             latest="$2";           shift;;
           --help )               usage;                 exit;; # quit and show usage
           * )                    args+=("$1")           # if no match, add it to the positional args
@@ -46,17 +46,17 @@ function parse_args
 
 function run
 {
-
   parse_args "$@"
 
   . lib/log.sh
 
 	build_id=`date +%s | sha1sum | cut -c -4`
 
-	log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
+	log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
 	log info "AWS profile: $aws_profile"
-  java_version=$java_major
 
+  java_version=$java_major
+    
 	copy_regions_list="[]"
 	if [ $copy_regions == "true" ]
 	then
@@ -84,7 +84,7 @@ function run
 	  -var "java_version=$java_version" \
 	  -var "copy_regions=$copy_regions_list" \
 	  -var "ami_description=$ami_description" \
-	  packer/aws-x86-graal.pkr.hcl
+	  packer/aws-arm-graal.pkr.hcl
 }
 
 run "$@";

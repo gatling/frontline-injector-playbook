@@ -36,7 +36,7 @@ variable "kernel_version" {
 
 variable "ami" {
   type = string
-  default = "al2023-ami-*-kernel-6.1-x86_64"  
+  default = "al2023-ami-*-kernel-6.1-arm64"  
 }
 
 variable "region" {
@@ -64,7 +64,7 @@ variable "ami_description" {
 # Data & Sources
 # -----------------------------------------------
 
-data "amazon-ami" "x86_64" {
+data "amazon-ami" "arm64" {
   filters = {
     name                = "${var.ami}"
     root-device-type    = "ebs"
@@ -75,15 +75,15 @@ data "amazon-ami" "x86_64" {
   region      = "${var.region}"
 }
 
-source "amazon-ebs" "x86_64" {
+source "amazon-ebs" "arm64" {
   ami_description  = "${var.ami_description}"
   ami_groups       = ["all"]
-  ami_name         = replace("Gatling Enterprise Injector x86_64 GraalVM ${var.java_version} (${var.build_id})", "+", "-")
+  ami_name         = replace("Gatling Enterprise Injector arm64 GraalVM ${var.java_version} (${var.build_id})", "+", "-")
   ami_regions      = var.copy_regions
   region           = "${var.region}"
-  source_ami       = "${data.amazon-ami.x86_64.id}"
+  source_ami       = "${data.amazon-ami.arm64.id}"
   #instance_type    = "t2.large"
-  spot_instance_types = ["t2.large"]
+  spot_instance_types = ["c6g.large"]
   spot_price          = "auto"
 
   ssh_interface = "public_ip"
@@ -92,7 +92,7 @@ source "amazon-ebs" "x86_64" {
 	profile = "${var.aws_profile}"
 
   tags = {
-    Name         = replace("Gatling Enterprise Injector x86_64 GraalVM ${var.java_version} (${var.build_id})", "+", "-")
+    Name         = replace("Gatling Enterprise Injector arm64 GraalVM ${var.java_version} (${var.build_id})", "+", "-")
     JavaBundleType = "${var.java_bundle_type}"
     JavaVendor     = "${var.java_vendor}"
     JavaVersion    = "${var.java_version}"
@@ -105,7 +105,7 @@ source "amazon-ebs" "x86_64" {
 # -----------------------------------------------
 
 build {
-  sources = ["source.amazon-ebs.x86_64"]
+  sources = ["source.amazon-ebs.arm64"]
 
   provisioner "shell" {
    environment_vars = [
@@ -118,7 +118,7 @@ build {
       "remote-script/update-system.sh",
       "remote-script/install-commons.sh",
       "remote-script/disable-update.sh",
-      "remote-script/graalvm-setup-x86.sh",
+      "remote-script/graalvm-setup-arm64.sh",
       "remote-script/system.sh",
       "remote-script/cleanup.sh"
       ]

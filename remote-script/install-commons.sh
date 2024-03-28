@@ -2,10 +2,9 @@
 
 
 echo "------------------------------------------------------------------------"
-echo "-- updating system                                                    --"
+echo "-- installing commons                                                 --"
 echo "------------------------------------------------------------------------"
 
 sudo su << EOT
-yum update -y
-yum upgrade -y
+yum install -y jq
 EOT
