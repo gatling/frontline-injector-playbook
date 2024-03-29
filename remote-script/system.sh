@@ -67,8 +67,8 @@ EOC
 sysctl -p /etc/sysctl.d/99-gatling.conf
 
 cat  << EOC >> /etc/security/limits.conf
-*              soft     nofile          1048576
 *              hard     nofile          1048576
+*              soft     nofile          1048576
 EOC
 
 
