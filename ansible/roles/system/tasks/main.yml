@@ -32,3 +32,4 @@
     path: /etc/systemd/system.conf.d/50-limits.conf
     regexp: 'DefaultLimitNOFILE=.*'
     replace: 'DefaultLimitNOFILE=1048576:1048576'
+  when: ansible_os_family == 'RedHat'
