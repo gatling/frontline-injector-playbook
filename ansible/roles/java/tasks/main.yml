@@ -1,5 +1,5 @@
-- include_tasks: adoptjdk.yml
+- include: adoptjdk.yml
   when: java_vendor == "adoptjdk"
 
-- include_tasks: "zulu.{{ansible_architecture}}.yml"
+- include: "zulu.{{ansible_architecture}}.yml"
   when: java_vendor == "zulu"
