@@ -24,5 +24,11 @@
   blockinfile:
     dest: /etc/security/limits.conf
     block: |
-      *              soft     nofile          1048576
       *              hard     nofile          1048576
+      *              soft     nofile          1048576
+
+- name: 50-ulimit 
+  ansible.builtin.replace:
+    path: /etc/systemd/system.conf.d/50-limits.conf
+    regexp: 'DefaultLimitNOFILE=.*'
+    replace: 'DefaultLimitNOFILE=1048576:1048576'
