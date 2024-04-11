@@ -114,13 +114,13 @@ build {
 
     
     scripts= [
-      "remote-script/wait-cloud-init-ends.sh",
-      "remote-script/update-system.sh",
-      "remote-script/install-commons.sh",
-      "remote-script/disable-update.sh",
-      "remote-script/graalvm-setup-arm64.sh",
-      "remote-script/system.sh",
-      "remote-script/cleanup.sh"
+      "remote-script/01-wait-cloud-init-ends.sh",
+      "remote-script/02-update-system.sh",
+      "remote-script/03-install-commons.sh",
+      "remote-script/04-disable-update.sh",
+      "remote-script/06-graalvm-setup-arm64.sh",
+      "remote-script/07-system.sh",
+      "remote-script/08-cleanup.sh"
       ]
   }
   
