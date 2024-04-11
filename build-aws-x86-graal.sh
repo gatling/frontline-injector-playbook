@@ -87,4 +87,5 @@ function run
 	  packer/aws-x86-graal.pkr.hcl
 }
 
+
 run "$@";

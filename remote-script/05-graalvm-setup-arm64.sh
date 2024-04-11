@@ -18,9 +18,9 @@ ln -s  ./"\$p"  ./graalvm
 echo "ln -s  ./\$p   ./graalvm"
 
 
-touch /etc/profile/graalvm.sh
-chown root:root /etc/profile/graalvm.sh
-chmod 644 /etc/profile/graalvm.sh
+touch /etc/profile.d/graalvm.sh
+chown root:root /etc/profile.d/graalvm.sh
+chmod 644 /etc/profile.d/graalvm.sh
 
 echo "# /etc/profile.d/graalvm   - graalvm paths  " >> /etc/profile.d/graalvm.sh
 echo "export PATH=/opt/graalvm/bin:\$PATH" >> /etc/profile.d/graalvm.sh
