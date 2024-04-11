@@ -117,7 +117,6 @@ build {
       "remote-script/01-wait-cloud-init-ends.sh",
       "remote-script/02-update-system.sh",
       "remote-script/03-install-commons.sh",
-      "remote-script/04-disable-update.sh",
       "remote-script/05-graalvm-setup-x86.sh",
       "remote-script/06-system.sh",
       "remote-script/07-cleanup.sh"
