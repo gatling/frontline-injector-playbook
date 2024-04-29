@@ -69,8 +69,8 @@ source "azure-arm" "x86_64" {
 
   os_type         = "Linux"
   image_publisher = "Debian"
-  image_offer     = "debian-12"
-  image_sku       = "12"
+  image_offer     = "debian-11"
+  image_sku       = "11"
   vm_size         = "STANDARD_F4S_V2"
 
   shared_image_gallery_destination {
