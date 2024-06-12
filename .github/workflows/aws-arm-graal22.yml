@@ -1,4 +1,4 @@
-name: AWS arm java 21
+name: AWS arm graalvm 21
 on:
   workflow_dispatch:
 
