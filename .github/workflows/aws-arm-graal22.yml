@@ -18,11 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11.5'
-
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v1
         with:
@@ -33,6 +28,11 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
+
+
+      - name: Build image from template
+        run: cd packer; packer init aws-arm-graal.pkr.hcl
+
 
       - name: Build image from template
         run: ./build-aws-arm-graal.sh --java-major 22 --copy-regions true --profile default --latest false  
