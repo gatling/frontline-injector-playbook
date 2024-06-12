@@ -7,10 +7,12 @@ echo "------------------------------------------------------------------------"
 
 
 sudo su <<EOT
-curl -O https://download.oracle.com/graalvm/${JAVA_MAJOR}/latest/graalvm-jdk-${JAVA_MAJOR}_linux-x64_bin.tar.gz
+mkdir -p /opt
+cd /opt
 
-tar -xzf graalvm-jdk-${JAVA_MAJOR}_linux-x64_bin.tar.gz
-rm -f graalvm-jdk-${JAVA_MAJOR}_linux-x64_bin.tar.gz
+curl -LO https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${JAVA_MAJOR}.0.1/graalvm-community-jdk-${JAVA_MAJOR}.0.1_linux-x64_bin.tar.gz
+tar -xzf graalvm-community-jdk-${JAVA_MAJOR}.0.1_linux-x64_bin.tar.gz
+rm -f graalvm-community-jdk-${JAVA_MAJOR}.0.1_linux-x64_bin.tar.gz
 
 p=\$(ls -t | head -1)
 ln -s  ./"\$p"  ./graalvm
