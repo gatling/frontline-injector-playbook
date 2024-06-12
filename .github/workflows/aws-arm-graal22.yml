@@ -1,4 +1,4 @@
-name: AWS arm graalvm 21
+name: AWS arm graalvm 22
 on:
   workflow_dispatch:
 
