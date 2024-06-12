@@ -31,7 +31,7 @@ jobs:
 
 
       - name: Build image from template
-        run: cd packer; packer init
+        run: cd packer; packer init aws-x86-graal.pkr.hcl
 
 
       - name: Build image from template
