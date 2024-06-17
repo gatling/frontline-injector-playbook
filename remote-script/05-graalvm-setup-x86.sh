@@ -23,8 +23,8 @@ touch /etc/profile.d/graalvm.sh
 chown root:root /etc/profile.d/graalvm.sh
 chmod 644 /etc/profile.d/graalvm.sh
 
-echo "# /etc/profile.d/graalvm   - graalvm paths  " >> /etc/profile.d/graalvm.sh
-echo "export PATH=/opt/graalvm/bin:\$PATH" >> /etc/profile.d/graalvm.sh
-echo "export JAVA_HOME=/opt/graalvm" >> /etc/profile.d/graalvm.sh
+#echo "# /etc/profile.d/graalvm   - graalvm paths  " >> /etc/profile.d/graalvm.sh
+echo "export PATH=/opt/graalvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin" >> /etc/environment  
+echo "export JAVA_HOME=/opt/graalvm" >> /etc/environment
 
 EOT
