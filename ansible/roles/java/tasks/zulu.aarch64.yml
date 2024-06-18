@@ -70,3 +70,9 @@
     state: link
     force: true
   when: java_bundle_type == "jdk"
+  
+- name: Adding PATH
+  copy:
+    src: java.sh
+    dest: /etc/profile.d/java.sh
+  
