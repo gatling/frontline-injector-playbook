@@ -1,4 +1,4 @@
-# /etc/profile.d/graalvm   - graalvm paths  
+# /etc/profile.d/java   - java paths  
 
-export JAVA_HOME=/opt/graalvm
-export PATH=/opt/graalvm/bin:$PATH
+export JAVA_HOME=/opt/java
+export PATH=/opt/java/bin:$PATH
