@@ -1,4 +1,4 @@
-name: AWS x86 graalvm 22
+name: AWS arm graalvm latest
 on:
   workflow_dispatch:
 
@@ -31,8 +31,8 @@ jobs:
 
 
       - name: Build image from template
-        run: cd packer; packer init aws-x86-graal.pkr.hcl
+        run: cd packer; packer init aws-arm-graal.pkr.hcl
 
 
       - name: Build image from template
-        run: ./build-aws-x86-graal.sh --java-major 22 --copy-regions true --profile default --latest false  
+        run: ./build-aws-arm-graal.sh --java-major 22 --copy-regions true --profile default --latest true

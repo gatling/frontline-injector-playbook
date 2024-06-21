@@ -69,10 +69,10 @@ function run
 		unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
 	fi
 
-	ami_description="classic-graalvm-$java_major"
+	ami_description="graalvm-openjdk-$java_major"
 	if [ $latest == "true" ]
 	then
-	    ami_description="classic-graalvm-latest"
+	    ami_description="graalvm-openjdk-latest"
 	fi
 
 	log info "AMI description: $ami_description"

@@ -1,4 +1,4 @@
-name: AWS x86 graalvm 22
+name: AWS x86 graalvm latest
 on:
   workflow_dispatch:
 
@@ -35,4 +35,4 @@ jobs:
 
 
       - name: Build image from template
-        run: ./build-aws-x86-graal.sh --java-major 22 --copy-regions true --profile default --latest false  
+        run: ./build-aws-x86-graal.sh --java-major 22 --copy-regions true --profile default --latest true
