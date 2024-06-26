@@ -1,4 +1,4 @@
-name: GCP x86 java 22
+name: GCP x86 graalvm 22
 on:
   workflow_dispatch:
 
