@@ -80,7 +80,7 @@ function run
    -var "image_family=$image_family" \
    ./packer/gcp-x86-graal.pkr.hcl 
 
-#  $GCP_CLI auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+  $GCP_CLI auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
 	$GCP_CLI --project "$project_id" compute images \
     add-iam-policy-binding "$image_name" \
