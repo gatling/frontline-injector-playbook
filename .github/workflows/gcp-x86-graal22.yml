@@ -32,5 +32,5 @@ jobs:
           ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
 
       - name: Build image from template
-        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-gcp.sh  --java-major 22 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest false
+        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-graal.sh  --java-major 22 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest false
           
