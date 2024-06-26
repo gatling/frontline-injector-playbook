@@ -1,4 +1,4 @@
-name: Azure x86  22
+name: Azure x86 Graal 22
 on:
   workflow_dispatch:
     inputs:
