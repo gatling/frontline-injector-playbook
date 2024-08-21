@@ -108,46 +108,10 @@ build {
       "remote-script/03-debian-install-commons.sh",
       "remote-script/05-graalvm-setup-x86.sh",
       "remote-script/06-system.sh",
-      "remote-script/07-cleanup.sh"
+      "remote-script/07-debian-cleanup.sh"
       ]
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-  # provisioner "ansible" {
-  #   ansible_env_vars = ["ANSIBLE_HOST_KEY_CHECKING=False"]
-  #   extra_arguments = ["--become",
-  #     "--extra-vars", "install_path=/opt",
-  #     "--extra-vars", "java_major=${var.java_major}",
-  #     "--extra-vars", "java_version=${var.java_version}",
-  #     "--extra-vars", "java_vendor=${var.java_vendor}",
-  #     "--extra-vars", "java_bundle_type=${var.java_bundle_type}"]
-  #   playbook_file = "ansible/probe.yml"
-  #   user          = "${var.ssh_username}"
-  #   use_proxy     = false
-  # }
-
-  # provisioner "shell" {
-  #   inline = ["sudo find /var/log -type f -exec rm -f {} \\;", "sudo find /tmp -exec rm -f \\;", "sudo rm -rf /root/.ansible"]
-  # }
-
-  # provisioner "shell" {
-  #   execute_command = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
-  #   inline          = ["/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"]
-  #   inline_shebang  = "/bin/sh -x"
-  # }
-
-
-
-
 
 
