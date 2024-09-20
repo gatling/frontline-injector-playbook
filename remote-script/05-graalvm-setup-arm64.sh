@@ -11,9 +11,9 @@ sudo su <<EOT
 mkdir -p /opt
 cd /opt
 
-curl -LO https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${JAVA_MAJOR}.0.1/graalvm-community-jdk-${JAVA_MAJOR}.0.1_linux-aarch64_bin.tar.gz
-tar -xzf graalvm-community-jdk-${JAVA_MAJOR}.0.1_linux-aarch64_bin.tar.gz
-rm -f graalvm-community-jdk-${JAVA_MAJOR}.0.1_linux-aarch64_bin.tar.gz
+curl -LO https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${JAVA_MAJOR}.0.0/graalvm-community-jdk-${JAVA_MAJOR}.0.0_linux-aarch64_bin.tar.gz
+tar -xzf graalvm-community-jdk-${JAVA_MAJOR}.0.0_linux-aarch64_bin.tar.gz
+rm -f graalvm-community-jdk-${JAVA_MAJOR}.0.0_linux-aarch64_bin.tar.gz
 
 
 p=\$(ls -t | head -1)
