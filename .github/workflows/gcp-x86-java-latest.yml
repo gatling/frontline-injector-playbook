@@ -29,7 +29,10 @@ jobs:
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v1
         with:
-          packer-version: '1.7.8'
+          packer-version: '1.11.2'
+
+      - name: Init packer
+        run: cd packer; packer init gcp-x86-zulu.pkr.hcl
 
       - name: Configure GCP Credentials
         run: |
@@ -39,5 +42,5 @@ jobs:
           ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
 
       - name: Build image from template
-        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 22 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest true
+        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 23 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest true
           

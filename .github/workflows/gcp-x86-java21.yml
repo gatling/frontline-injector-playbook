@@ -29,7 +29,10 @@ jobs:
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v1
         with:
-          packer-version: '1.7.8'
+          packer-version: '1.11.2'
+
+      - name: Init packer
+        run: cd packer; packer init gcp-x86-zulu.pkr.hcl
 
       - name: Configure GCP Credentials
         run: |
