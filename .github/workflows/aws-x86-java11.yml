@@ -16,26 +16,22 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Install `python`
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11.5'
+          python-version: '3.12.6'
 
-      - name: Setup Ansible and JMESPath
-        uses: BSFishy/pip-action@v1
+      - name: Install `ansible bundle`
+        run: pip install ansible
+
+      - name: Setup `packer`
+        uses: hashicorp-contrib/setup-packer@main
         with:
-          packages: |
-            ansible==4.8.0
-            jmespath
+          packer-version: 'latest'
 
-      - name: Setup Packer
-        uses: hashicorp-contrib/setup-packer@v1
-        with:
-          packer-version: '1.11.2'
-
-      - name: Init packer
+      - name: Init `packer`
         run: cd packer; packer init aws-x86-zulu.pkr.hcl
 
       - name: Configure AWS Credentials
@@ -44,5 +40,5 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
 
-      - name: Build image from template
-        run: ./build-aws-x86-zulu.sh --java-major 11 --copy-regions true --profile default --latest false
+          #- name: Build image from template
+          # run: ./build-aws-x86-zulu.sh --java-major 11 --copy-regions true --profile default --latest false
