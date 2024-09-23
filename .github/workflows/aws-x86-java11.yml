@@ -28,10 +28,12 @@ jobs:
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
+        id: setup
         with:
-          packer-version: 'latest'
+          version: "latest"
 
       - name: Init `packer`
+        id: init
         run: cd packer; packer init aws-x86-zulu.pkr.hcl
 
       - name: Configure AWS Credentials
