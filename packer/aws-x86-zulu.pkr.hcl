@@ -22,12 +22,13 @@ variable "java_vendor" {
 
 variable "kernel_version" {
   type = string
-  default = "kernel-5"
+  default = "kernel-6"
 }
 
 variable "ami" {
   type = string
-  default = "amzn2-ami-kernel-5.10-hvm-2.0.*-x86_64-gp2"
+  #default = "amzn2-ami-kernel-5.10-hvm-2.0.*-x86_64-gp2"
+  default = "al2023-ami-*-kernel-6.1-x86_64"  
 }
 
 variable "region" {
