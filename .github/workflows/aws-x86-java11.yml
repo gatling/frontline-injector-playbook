@@ -27,7 +27,7 @@ jobs:
         run: pip install ansible
 
       - name: Setup `packer`
-        uses: hashicorp-contrib/setup-packer@main
+        uses: hashicorp/setup-packer@main
         with:
           packer-version: 'latest'
 
