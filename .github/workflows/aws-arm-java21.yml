@@ -33,7 +33,10 @@ jobs:
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v1
         with:
-          packer-version: '1.7.8'
+          packer-version: '1.11.2'
+
+      - name: Init packer
+        run: cd packer; packer init aws-arm-zulu.pkr.hcl
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
