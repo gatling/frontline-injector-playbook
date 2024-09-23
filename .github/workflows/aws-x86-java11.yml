@@ -37,7 +37,7 @@ jobs:
         run: cd packer; packer init aws-x86-zulu.pkr.hcl
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
