@@ -10,7 +10,7 @@
 - name: install usefull packages
   dnf:
     name: 
-      - curl 
+      - curl-minimal
       - jq
     state: latest
   when: ansible_os_family == 'RedHat'
