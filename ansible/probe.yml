@@ -9,6 +9,6 @@
     - wait-cloud-init
     #- wait-package-manager
     #- compatibility
-    #- system
+    - system
     #- packages
     #- java

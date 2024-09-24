@@ -19,12 +19,18 @@
 
 # On a Amazon Linux 1 instance, ansible_pkg_mgr is broken and equals `dnf` when using Ansible 2.8
 # See https://github.com/ansible/ansible/issues/56583
-- name: Temporary workaround for ansible/ansible#56583
-  set_fact:
-    ansible_facts:
-      pkg_mgr: yum
-  when: ansible_os_family == 'RedHat' and ansible_distribution == 'Amazon'
+#- name: Temporary workaround for ansible/ansible#56583
+#  set_fact:
+#    ansible_facts:
+#      pkg_mgr: yum
+#  when: ansible_os_family == 'RedHat' and ansible_distribution == 'Amazon'
+#
+#- name: Upgrade all packages
+#  action: '{{ ansible_facts.pkg_mgr }} name=* state=latest'
+#  when: ansible_os_family == 'RedHat'
 
 - name: Upgrade all packages
-  action: '{{ ansible_facts.pkg_mgr }} name=* state=latest'
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
   when: ansible_os_family == 'RedHat'
