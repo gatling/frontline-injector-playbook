@@ -11,4 +11,4 @@
     #- compatibility
     - system
     - packages
-    #- java
+    - java
