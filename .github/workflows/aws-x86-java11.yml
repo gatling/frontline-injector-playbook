@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12.6'
 
       - name: Install `ansible bundle`
-        run: pip install ansible
+        run: pip install ansible jmespath
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
