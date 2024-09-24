@@ -10,5 +10,5 @@
     #- wait-package-manager
     #- compatibility
     - system
-    #- packages
+    - packages
     #- java
