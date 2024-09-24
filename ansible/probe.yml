@@ -7,8 +7,8 @@
       type: jdk
   roles:
     - wait-cloud-init
-    - wait-package-manager
-    - compatibility
-    - system
-    - packages
-    - java
+    #- wait-package-manager
+    #- compatibility
+    #- system
+    #- packages
+    #- java
