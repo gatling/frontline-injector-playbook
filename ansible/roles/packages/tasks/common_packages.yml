@@ -12,5 +12,5 @@
     name: 
       - curl 
       - jq
-    state: present
+    state: latest
   when: ansible_os_family == 'RedHat'
