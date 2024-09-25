@@ -31,10 +31,10 @@ jobs:
         with:
           version: "latest"
 
-      - name: Install `packer plugins: Amazon`
+      - name: Install `packer plugins - Amazon`
         run: packer plugins install github.com/hashicorp/amazon
 
-      - name: Install `packer plugins: Ansible`
+      - name: Install `packer plugins - Ansible`
         run: packer plugins install github.com/hashicorp/ansible
 
       - name: Configure AWS Credentials
