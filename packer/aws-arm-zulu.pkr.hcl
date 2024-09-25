@@ -27,7 +27,7 @@ variable "kernel_version" {
 
 variable "ami" {
   type = string
-  default = "al2023-ami-*-kernel-6.1-x86_64"  
+  default = "al2023-ami-*-kernel-6.1-arm64"  
 }
 
 variable "region" {
