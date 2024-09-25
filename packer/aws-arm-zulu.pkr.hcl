@@ -2,20 +2,6 @@
 # Variables
 # -----------------------------------------------
 
-packer {
-  required_plugins {
-    amazon = {
-      version = ">= 1.3.1"
-      source = "github.com/hashicorp/amazon"
-    }
-
-    ansible = {
-      version = ">= 1.1.1"
-      source  = "github.com/hashicorp/ansible"
-    }
-  }
-}
-
 variable "java_major" {
   type = string
 }
@@ -41,7 +27,6 @@ variable "kernel_version" {
 
 variable "ami" {
   type = string
-  #default = "amzn2-ami-kernel-5.10-hvm-2.0.*-arm64-gp2"
   default = "al2023-ami-*-kernel-6.1-x86_64"  
 }
 
@@ -82,6 +67,7 @@ data "amazon-ami" "arm64" {
 }
 
 source "amazon-ebs" "arm64" {
+  skip_create_ami  = true
   ami_description  = "${var.ami_description}"
   ami_groups       = ["all"]
   ami_name         = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
