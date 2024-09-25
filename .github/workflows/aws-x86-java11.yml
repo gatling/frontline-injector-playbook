@@ -28,13 +28,14 @@ jobs:
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
-        id: setup
         with:
           version: "latest"
 
-      - name: Init `packer`
-        id: init
-        run: cd packer; packer init aws-x86-zulu.pkr.hcl
+      - name: Install `packer plugins: Amazon`
+        run: packer plugins install github.com/hashicorp/amazon
+
+      - name: Install `packer plugins: Ansible`
+        run: packer plugins install github.com/hashicorp/ansible
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
