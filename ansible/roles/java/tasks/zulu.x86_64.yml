@@ -15,9 +15,14 @@
 # java_version is xx.x format instead of xx.xx.xx.xx previuously
 - name: getting package download url for X86 arch
   uri: 
-    url: "https://api.azul.com/zulu/download/community/v1.0/bundles/?os=linux&jdk_version={{java_version | regex_replace('([0-9]+.[0-9]+).*','\\1') }}&bundle_type={{ java_bundle_type }}&latest=true&ext=tar.gz&arch=x86&hw_bitness=64&javafx=false&crac=false"
+  #    url: "https://api.azul.com/zulu/download/community/v1.0/bundles/?os=linux&jdk_version={{java_version | regex_replace('([0-9]+.[0-9]+).*','\\1') }}&bundle_type={{ java_bundle_type }}&latest=true&ext=tar.gz&arch=x86&hw_bitness=64&javafx=false&crac=false"
+  #
+  #    Nouvelle doc d'api
+  #    https://api.azul.com/metadata/v1/docs/swagger
+    url: "https://api.azul.com/metadata/v1/zulu/packages/?java_version={{java_version | regex_replace('([0-9]+.[0-9]+).*','\\1') }}&os=linux&arch=x86&java_package_type={{ java_bundle_type }}&javafx_bundled=false&crac_supported=false&archive_type=tar.gz"
     return_content: yes
   register: zulu_download_url
+
 
 
 - name: install directory
@@ -29,7 +34,8 @@
 
 - name: Download latest
   unarchive:
-    src: "{{ zulu_download_url.json | json_query('[0].url') }}"
+    #src: "{{ zulu_download_url.json | json_query('[0].url') }}"
+    src: "{{ zulu_download_url.json | json_query('[0].download_url') }}"
     dest: "{{ install_path }}"
     remote_src: yes
   register: zulu_jdk_downloaded
