@@ -15,7 +15,7 @@
 # java_version is xx.x format instead of xx.xx.xx.xx previuously
 - name: getting package download url for X86 arch
   uri: 
-    url: "https://api.azul.com/zulu/download/community/v1.0/bundles/?os=linux&jdk_version={{java_version | regex_replace('([0-9]+.[0-9]+).*','\\1') }}&bundle_type={{ java_bundle_type }}&latest=true&ext=tar.gz&arch=x86&hw_bitness=64&javafx=false&crac_supported=false"
+    url: "https://api.azul.com/zulu/download/community/v1.0/bundles/?os=linux&jdk_version={{java_version | regex_replace('([0-9]+.[0-9]+).*','\\1') }}&bundle_type={{ java_bundle_type }}&latest=true&ext=tar.gz&arch=x86&hw_bitness=64&javafx=false&crac=false"
     return_content: yes
   register: zulu_download_url
 
