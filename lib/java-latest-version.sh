@@ -16,7 +16,7 @@ if [ $exit_code -ne 0 ]; then
   exit $exit_code
 fi
 
-java_version=$(echo "$zulu_output" | jq '.[0].jdk_version | _nwise(3)| join(".")' | jq --slurp | jq 'join("+")' -r)
+java_version=$(echo "$zulu_output" | jq '.[0].distro_version | _nwise(3)| join(".")' | jq --slurp | jq 'join("+")' -r)
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
