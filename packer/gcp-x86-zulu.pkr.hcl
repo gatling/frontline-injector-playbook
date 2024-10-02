@@ -1,19 +1,3 @@
-packer {
-  required_plugins {
-
-    googlecompute = {
-      version = ">= 1.1.4"
-      source  = "github.com/hashicorp/googlecompute"
-    }
-
-    ansible = {
-      version = ">= 1.1.1"
-      source  = "github.com/hashicorp/ansible"
-    }
-
-  }
-}
-
 # -----------------------------------------------
 # Variables
 # -----------------------------------------------
@@ -77,6 +61,7 @@ locals {
 
 
 source "googlecompute" "x86_64" {
+  skip_create_image       = true
   image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
   #image_family            = "classic-openjdk-${var.java_major}"
   #image_name              = "classic-openjdk-${var.java_major}-${var.build_id}"
