@@ -61,7 +61,7 @@ locals {
 
 
 source "googlecompute" "x86_64" {
-  skip_create_image       = true
+  skip_create_image       = false
   image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
   #image_family            = "classic-openjdk-${var.java_major}"
   #image_name              = "classic-openjdk-${var.java_major}-${var.build_id}"
