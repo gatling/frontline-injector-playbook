@@ -67,7 +67,7 @@ data "amazon-ami" "arm64" {
 }
 
 source "amazon-ebs" "arm64" {
-  skip_create_ami  = false
+  skip_create_ami  = true
   ami_description  = "${var.ami_description}"
   ami_groups       = ["all"]
   ami_name         = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
