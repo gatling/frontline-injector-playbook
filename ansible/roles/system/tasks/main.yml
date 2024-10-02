@@ -33,3 +33,9 @@
     regexp: 'DefaultLimitNOFILE=.*'
     replace: 'DefaultLimitNOFILE=1048576:1048576'
   when: ansible_os_family == 'RedHat'
+
+- name: systemd-coredump to 0
+  lineinfile:
+    path: /etc/systemd/coredump.conf
+    insertafter: "[Coredump]" 
+    line:  "Storage=none"
