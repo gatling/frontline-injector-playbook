@@ -5,10 +5,8 @@ set -eu
 default_bundle="jre"
 java_major="$1"
 arch="$2"
-bundle_type="${3:-$default_bundle}"
 
-
-zulu_url="https://api.azul.com/zulu/download/community/v1.0/bundles/?os=linux&jdk_version=${java_major}&arch=${arch}&hw_bitness=64&ext=tar.gz&bundle_type=${bundle_type}&latest=true&javafx=false"
+zulu_url="https://api.azul.com/metadata/v1/zulu/packages/?java_version=${java_major}&os=linux-glibc&arch=${arch}&archive_type=tar.gz&java_package_type=jre&javafx_bundled=false&crac_supported=false&latest=true&release_status=ga&availability_types=CA&certifications=tck"
 
 zulu_output=$(curl -Lfs "${zulu_url}")
 exit_code=$?
