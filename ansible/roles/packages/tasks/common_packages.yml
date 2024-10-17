@@ -12,5 +12,6 @@
     name: 
       - curl-minimal
       - jq
+      - libxcrypt-compat
     state: latest
   when: ansible_os_family == 'RedHat'
