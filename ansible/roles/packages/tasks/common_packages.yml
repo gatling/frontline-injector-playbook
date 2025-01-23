@@ -4,6 +4,7 @@
     name:
       - curl
       - jq
+      - systemd-coredump
     state: present
   when: ansible_os_family == 'Debian'
 
