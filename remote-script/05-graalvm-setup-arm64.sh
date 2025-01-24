@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+set -Eeuo pipefail
 
 
 echo "------------------------------------------------------------------------"
@@ -11,9 +12,11 @@ sudo su <<EOT
 mkdir -p /opt
 cd /opt
 
-curl -LO https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${JAVA_MAJOR}.0.0/graalvm-community-jdk-${JAVA_MAJOR}.0.0_linux-aarch64_bin.tar.gz
-tar -xzf graalvm-community-jdk-${JAVA_MAJOR}.0.0_linux-aarch64_bin.tar.gz
-rm -f graalvm-community-jdk-${JAVA_MAJOR}.0.0_linux-aarch64_bin.tar.gz
+curl -LO -f https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${GRAALVM_VERSION}/graalvm-community-jdk-${GRAALVM_VERSION}_linux-aarch64_bin.tar.gz
+
+
+tar -xzf graalvm-community-jdk-${GRAALVM_VERSION}_linux-aarch64_bin.tar.gz
+rm -f graalvm-community-jdk-${GRAALVM_VERSION}_linux-aarch64_bin.tar.gz
 
 
 p=\$(ls -t | head -1)

@@ -35,4 +35,4 @@ jobs:
 
 
       - name: Build image from template
-        run: ./build-aws-arm-graal.sh --java-major 22 --copy-regions true --profile default --latest false  
+        run: ./build-aws-arm-graal.sh --java-major 22 --graalvm-version 22.0.2 --copy-regions true --profile default --latest false  

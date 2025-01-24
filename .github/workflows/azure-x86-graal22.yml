@@ -26,4 +26,4 @@ jobs:
         # run: packer plugins install github.com/hashicorp/azure && packer plugins install github.com/hashicorp/ansible
 
       - name: Build image from template
-        run: ./build-azure-x86-graal.sh  --java-major 22 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
+        run: ./build-azure-x86-graal.sh  --java-major 22 --graalvm-version 22.0.2 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
