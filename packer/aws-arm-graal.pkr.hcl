@@ -98,6 +98,11 @@ source "amazon-ebs" "arm64" {
     JavaVersion    = "${var.graalvm_version}"
     KernelVersion  = "${var.kernel_version}"
   }
+   launch_block_device_mappings {
+        device_name = "/dev/xvda"
+        volume_size = 3
+        delete_on_termination = true
+    }
 }
 
 # -----------------------------------------------
