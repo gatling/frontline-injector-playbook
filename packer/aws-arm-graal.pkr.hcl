@@ -109,7 +109,7 @@ build {
 
   provisioner "shell" {
    environment_vars = [
-     "GRAALVM_VERSION=${var.graalvm_version}"
+     "GRAALVM_VERSION=${var.graalvm_version}",
     "JAVA_MAJOR=${var.java_major}",
   ]
 
