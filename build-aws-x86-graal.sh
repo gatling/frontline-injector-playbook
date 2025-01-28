@@ -37,12 +37,11 @@ function parse_args
       shift # move to next kv pair
   done
 
-
   # Validate required args
   if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}"  ]]; then
       echo "Invalid arguments"
       usage
-      exit;
+      exit 1;
   fi
 
 }
