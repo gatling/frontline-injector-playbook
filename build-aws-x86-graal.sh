@@ -38,7 +38,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" ]]|| -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}"  ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}"  ]]; then
       echo "Invalid arguments"
       usage
       exit 1;
