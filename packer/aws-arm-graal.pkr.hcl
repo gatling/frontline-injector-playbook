@@ -15,7 +15,7 @@ variable "java_major" {
   type = string
 }
 
-variable "java_version" {
+variable "graalvm_version" {
   type = string
 }
 
@@ -78,7 +78,7 @@ data "amazon-ami" "arm64" {
 source "amazon-ebs" "arm64" {
   ami_description  = "${var.ami_description}"
   ami_groups       = ["all"]
-  ami_name         = replace("Gatling Enterprise Injector arm64 GraalVM ${var.java_version} (${var.build_id})", "+", "-")
+  ami_name         = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
   ami_regions      = var.copy_regions
   region           = "${var.region}"
   source_ami       = "${data.amazon-ami.arm64.id}"
@@ -92,10 +92,10 @@ source "amazon-ebs" "arm64" {
 	profile = "${var.aws_profile}"
 
   tags = {
-    Name         = replace("Gatling Enterprise Injector arm64 GraalVM ${var.java_version} (${var.build_id})", "+", "-")
+    Name         = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
     JavaBundleType = "${var.java_bundle_type}"
     JavaVendor     = "${var.java_vendor}"
-    JavaVersion    = "${var.java_version}"
+    JavaVersion    = "${var.graalvm_version}"
     KernelVersion  = "${var.kernel_version}"
   }
 }
@@ -109,6 +109,7 @@ build {
 
   provisioner "shell" {
    environment_vars = [
+     "GRAALVM_VERSION=${var.graalvm_version}"
     "JAVA_MAJOR=${var.java_major}",
   ]
 

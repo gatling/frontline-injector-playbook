@@ -8,9 +8,10 @@ AWS_CLI=$(which aws)
 
 function usage
 {
-    echo "usage: $0 --java-major MAJOR --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
+    echo "usage: $0 --java-major MAJOR --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
+    echo "  --graalvm-version    : Graalvm version with minor";
     echo "  --copy-regions      : true or false";
     echo "  --profile           : AWS Profile";
     echo "  --latest            : Want latest ?";
@@ -26,6 +27,7 @@ function parse_args
   while [ "$1" != "" ]; do
       case "$1" in
           --java-major )         java_major="$2";       shift;;
+          --graalvm-version )    graalvm_version="$2";       shift;;
           --copy-regions )       copy_regions="$2";     shift;;
           --profile )            aws_profile="$2";      shift;;
           --latest )             latest="$2";           shift;;
@@ -36,7 +38,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}" ]]; then
       echo "Invalid arguments"
       usage
       exit;
@@ -54,9 +56,7 @@ function run
 
 	log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
 	log info "AWS profile: $aws_profile"
-
-  java_version=$java_major
-    
+  
 	copy_regions_list="[]"
 	if [ $copy_regions == "true" ]
 	then
@@ -81,7 +81,7 @@ function run
 	  -var "aws_profile=$aws_profile" \
 	  -var "build_id=$build_id" \
 	  -var "java_major=$java_major" \
-	  -var "java_version=$java_version" \
+	  -var "graalvm_version=$graalvm_version" \
 	  -var "copy_regions=$copy_regions_list" \
 	  -var "ami_description=$ami_description" \
 	  packer/aws-arm-graal.pkr.hcl

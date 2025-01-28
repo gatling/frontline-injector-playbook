@@ -8,9 +8,10 @@ GCP_CLI=$(which gcloud)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR --project-id PROJECT_ID --latest [true|false] [--help]"
+    echo "usage: $0  --java-major MAJOR  --graalvm-version VERSION --project-id PROJECT_ID --latest [true|false] [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
+    echo "  --graalvm-version    : Graalvm version with minor";
     echo "  --project-id        : GCP project id";
     echo "  --latest            : Want latest ?";
     echo "  --help              : This message";
@@ -24,6 +25,7 @@ function parse_args
   # named args
   while [ "$1" != "" ]; do
       case "$1" in
+          --graalvm-version )    graalvm_version="$2";       shift;;
           --java-major )         java_major="$2";       shift;;
           --project-id )         project_id="$2";       shift;;
           --latest )             latest="$2";           shift;;
@@ -34,7 +36,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${project_id}" || -z "${latest}" ]]; then
+  if [[ -z "${java_major}" || -z "${project_id}" || -z "${latest}" || -z "${graalvm_version}" ]]; then
       echo "Invalid arguments"
       usage
       exit;
@@ -53,8 +55,7 @@ function run
 
   log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
   log info "Project ID: ${project_id} "
-  java_version=$java_major
-  log info "OpenJDK version: $java_version"
+  log info "OpenJDK version: $graalvm_version"
 
 
   image_name="graalvm-openjdk-${java_major}-${build_id}"
@@ -73,7 +74,7 @@ function run
 
   ${PACKER} build \
    -var "java_major=$java_major" \
-   -var "java_version=$java_version" \
+   -var "graalvm_version=$graalvm_version" \
    -var "project_id=$project_id" \
    -var "build_id=$build_id" \
    -var "image_name=$image_name" \
