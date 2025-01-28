@@ -102,7 +102,6 @@ source "amazon-ebs" "x86_64" {
 
    launch_block_device_mappings {
         device_name = "/dev/xvda"
-        volume_type = "esb"
         volume_size = 3
         delete_on_termination = true
     }
