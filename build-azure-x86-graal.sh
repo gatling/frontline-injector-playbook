@@ -42,7 +42,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" || -z "${graalvm_version}"" ]]; then
+  if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" || -z "${graalvm_version}" ]]; then
       echo "Invalid arguments"
       usage
       exit

@@ -1,4 +1,4 @@
-name: Azure x86 Graal 23
+name: Azure x86 Graal latest
 on:
   workflow_dispatch:
     inputs:
