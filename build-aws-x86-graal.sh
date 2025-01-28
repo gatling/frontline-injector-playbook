@@ -27,9 +27,9 @@ function parse_args
   while [ "$1" != "" ]; do
       case "$1" in
           --java-major )         java_major="$2";       shift;;
-          --graalvm-version )    graalvm_version="$2";       shift;;
+          --graalvm-version )    graalvm_version="$2";  shift;;
           --copy-regions )       copy_regions="$2";     shift;;
-          --profile )            aws_profile="$2";     shift;;
+          --profile )            aws_profile="$2";      shift;;
           --latest )             latest="$2";           shift;;
           --help )               usage;                 exit;; # quit and show usage
           * )                    args+=("$1")           # if no match, add it to the positional args
@@ -37,8 +37,9 @@ function parse_args
       shift # move to next kv pair
   done
 
+
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}  ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}"  ]]; then
       echo "Invalid arguments"
       usage
       exit;
