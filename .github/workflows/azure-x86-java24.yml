@@ -1,10 +1,10 @@
-name: GCP x86 java latest
+name: Azure x86 java 24
 on:
   workflow_dispatch:
-
-defaults:
-  run:
-    shell: bash
+    inputs:
+      image_version:
+        description: 'Image version (x.x.x)'
+        required: true
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Install `python`
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -27,18 +27,11 @@ jobs:
         with:
           version: "latest"
 
-      - name: Install `packer plugins - GCP`
-        run: packer plugins install github.com/hashicorp/googlecompute
+      - name: Install `packer plugins - Amazon`
+        run: packer plugins install github.com/hashicorp/azure
 
       - name: Install `packer plugins - Ansible`
         run: packer plugins install github.com/hashicorp/ansible
 
-      - name: Configure GCP Credentials
-        run: |
-          echo $ENV_FILE > creds.json;
-        shell: bash
-        env: 
-          ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
-
       - name: Build image from template
-        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 24 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest true
+        run: ./build-azure-x86-zulu.sh  --java-major 24 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
