@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install `python`
         uses: actions/setup-python@v5
@@ -38,10 +38,10 @@ jobs:
         run: packer plugins install github.com/hashicorp/ansible
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
 
       - name: Build image from template
-        run: ./build-aws-x86-zulu.sh --java-major 24 --copy-regions true --profile default --latest true
+        run: ./build-aws-x86-zulu.sh --java-major 25 --copy-regions true --profile default --latest true

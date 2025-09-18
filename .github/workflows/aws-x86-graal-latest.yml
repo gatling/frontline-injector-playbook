@@ -21,10 +21,10 @@ jobs:
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v1
         with:
-          packer-version: '1.7.8'
+          packer-version: '1.11.2'
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
@@ -33,4 +33,4 @@ jobs:
         run: cd packer; packer init aws-x86-graal.pkr.hcl
 
       - name: Build image from template
-        run: ./build-aws-x86-graal.sh --java-major 24 --graalvm-version 24.0.1 --copy-regions true --profile default --latest true
+        run: ./build-aws-x86-graal.sh --java-major 25 --graalvm-version 25.0.0--copy-regions true --profile default --latest true

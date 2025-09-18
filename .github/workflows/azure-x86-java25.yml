@@ -1,4 +1,4 @@
-name: Azure x86 java 23
+name: Azure x86 java 25
 on:
   workflow_dispatch:
     inputs:
@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install `python`
         uses: actions/setup-python@v5
@@ -34,4 +34,4 @@ jobs:
         run: packer plugins install github.com/hashicorp/ansible
 
       - name: Build image from template
-        run: ./build-azure-x86-zulu.sh  --java-major 23 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
+        run: ./build-azure-x86-zulu.sh  --java-major 25 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"

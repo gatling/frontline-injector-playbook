@@ -1,10 +1,6 @@
-name: AWS arm java 17
+name: GCP x86 java 25
 on:
   workflow_dispatch:
-
-permissions:
-      id-token: write
-      contents: read
 
 defaults:
   run:
@@ -16,9 +12,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Install `python`
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -31,17 +27,18 @@ jobs:
         with:
           version: "latest"
 
-      - name: Install `packer plugins - Amazon`
-        run: packer plugins install github.com/hashicorp/amazon
+      - name: Install `packer plugins - GCP`
+        run: packer plugins install github.com/hashicorp/googlecompute
 
       - name: Install `packer plugins - Ansible`
         run: packer plugins install github.com/hashicorp/ansible
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
-          aws-region: eu-west-3
+      - name: Configure GCP Credentials
+        run: |
+          echo $ENV_FILE > creds.json;
+        shell: bash
+        env: 
+          ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
 
       - name: Build image from template
-        run: ./build-aws-arm-zulu.sh --java-major 17 --copy-regions true --profile default --latest false
+        run: export GOOGLE_APPLICATION_CREDENTIALS="./creds.json";  ./build-gcp-x86-zulu.sh  --java-major 25 --project-id "${{ secrets.GOOGLE_PROJECT_ID }}" --latest false
