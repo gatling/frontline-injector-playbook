@@ -33,4 +33,4 @@ jobs:
         run: cd packer; packer init aws-x86-graal.pkr.hcl
 
       - name: Build image from template
-        run: ./build-aws-x86-graal.sh --java-major 25 --graalvm-version 25.0.0--copy-regions true --profile default --latest true
+        run: ./build-aws-x86-graal.sh --java-major 25 --graalvm-version 25.0.0 --copy-regions true --profile default --latest true
