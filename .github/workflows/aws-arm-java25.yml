@@ -1,10 +1,14 @@
-name: Azure x86 java 21
+name: AWS arm java 25
 on:
   workflow_dispatch:
-    inputs:
-      image_version:
-        description: 'Image version (x.x.x)'
-        required: true
+
+permissions:
+      id-token: write
+      contents: read
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build:
@@ -12,7 +16,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install `python`
         uses: actions/setup-python@v5
@@ -28,10 +32,16 @@ jobs:
           version: "latest"
 
       - name: Install `packer plugins - Amazon`
-        run: packer plugins install github.com/hashicorp/azure
+        run: packer plugins install github.com/hashicorp/amazon
 
       - name: Install `packer plugins - Ansible`
         run: packer plugins install github.com/hashicorp/ansible
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
+          aws-region: eu-west-3
+
       - name: Build image from template
-        run: ./build-azure-x86-zulu.sh  --java-major 21 --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}" --image-version "${{ github.event.inputs.image_version }}"
+        run: ./build-aws-arm-zulu.sh --java-major 25 --copy-regions true --profile default --latest false
