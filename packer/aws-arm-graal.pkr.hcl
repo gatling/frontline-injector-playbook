@@ -36,12 +36,12 @@ variable "kernel_version" {
 
 variable "ami" {
   type = string
-  default = "al2023-ami-*-kernel-6.1-arm64"  
+  default = "al2023-ami-2023.*-kernel-6.1-arm64"  
 }
 
 variable "region" {
   type = string
-  default = "eu-west-3"	
+  default = "eu-west-3"
 }
 
 variable "copy_regions" {
