@@ -36,7 +36,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${latest}" ]]; then
       echo "Invalid arguments"
       usage
       exit;
@@ -78,14 +78,25 @@ function run
 
 	log info "AMI description: $ami_description"
 
-	$PACKER build \
-	  -var "aws_profile=$aws_profile" \
-	  -var "build_id=$build_id" \
-	  -var "java_major=$java_major" \
-	  -var "java_version=$java_version" \
-	  -var "copy_regions=$copy_regions_list" \
-	  -var "ami_description=$ami_description" \
-	  packer/aws-x86-zulu.pkr.hcl
+        if [ -n "${aws_profile+x}" ]; then
+          log info "aws_profile: $aws_profile"
+	  $PACKER build \
+	    -var "aws_profile=$aws_profile" \
+	    -var "build_id=$build_id" \
+	    -var "java_major=$java_major" \
+	    -var "java_version=$java_version" \
+	    -var "copy_regions=$copy_regions_list" \
+	    -var "ami_description=$ami_description" \
+	    packer/aws-x86-zulu.pkr.hcl
+	else
+	  $PACKER build \
+	    -var "build_id=$build_id" \
+	    -var "java_major=$java_major" \
+	    -var "java_version=$java_version" \
+	    -var "copy_regions=$copy_regions_list" \
+	    -var "ami_description=$ami_description" \
+	    packer/aws-x86-zulu.pkr.hcl
+	fi
 }
 
 run "$@";
