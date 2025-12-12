@@ -44,4 +44,4 @@ jobs:
           aws-region: eu-west-3
 
       - name: Build image from template
-        run: ./build-aws-arm-zulu.sh --java-major 25 --copy-regions true --profile default --latest false
+        run: ./build-aws-arm-zulu.sh --java-major 25 --copy-regions true --latest false

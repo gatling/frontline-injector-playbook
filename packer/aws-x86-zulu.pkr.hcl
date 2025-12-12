@@ -95,7 +95,8 @@ source "amazon-ebs" "x86_64" {
   ssh_interface = "public_ip"
   ssh_username  = "ec2-user"
 
-	profile = "${var.aws_profile}"
+  #profile = "${var.aws_profile}"
+  profile = (var.aws_profile != null && var.aws_profile != "") ? var.aws_profile : null
 
   tags = {
     Name         = replace("Gatling Enterprise Injector x86_64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")

@@ -36,7 +36,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${latest}" ]]; then
       echo "Invalid arguments"
       usage
       exit;
@@ -60,9 +60,10 @@ function run
 	copy_regions_list="[]"
 	if [ $copy_regions == "true" ]
 	then
-    copy_regions_list=$($AWS_CLI ec2 describe-regions --region=eu-west-3 --query "Regions[?RegionName != 'eu-west-3'].RegionName" --output json | tr -s '[:blank:]' ' ')
+          copy_regions_list=$($AWS_CLI ec2 describe-regions --region=eu-west-3 --query "Regions[?RegionName != 'eu-west-3'].RegionName" --output json | tr -s '[:blank:]' ' ')
 	  log info "Copy regions: $copy_regions_list"
 	fi
+
 
 	if [ -f ~/.aws/config ]
 	then
@@ -77,14 +78,25 @@ function run
 
 	log info "AMI description: $ami_description"
 
-	$PACKER build \
-	  -var "aws_profile=$aws_profile" \
-	  -var "build_id=$build_id" \
-	  -var "java_major=$java_major" \
-	  -var "java_version=$java_version" \
-	  -var "copy_regions=$copy_regions_list" \
-	  -var "ami_description=$ami_description" \
-	  packer/aws-arm-zulu.pkr.hcl
+        if [ -n "${aws_profile+x}" ]; then
+          log info "aws_profile: $aws_profile"
+	  $PACKER build \
+	    -var "aws_profile=$aws_profile" \
+	    -var "build_id=$build_id" \
+	    -var "java_major=$java_major" \
+	    -var "java_version=$java_version" \
+	    -var "copy_regions=$copy_regions_list" \
+	    -var "ami_description=$ami_description" \
+	    packer/aws-arm-zulu.pkr.hcl
+        else	
+	  $PACKER build \
+	    -var "build_id=$build_id" \
+	    -var "java_major=$java_major" \
+	    -var "java_version=$java_version" \
+	    -var "copy_regions=$copy_regions_list" \
+	    -var "ami_description=$ami_description" \
+	    packer/aws-arm-zulu.pkr.hcl
+        fi
 }
 
 run "$@";
