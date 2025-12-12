@@ -54,7 +54,6 @@ function run
 	build_id=`date +%s | sha1sum | cut -c -4`
 
 	log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
-	log info "AWS profile: $aws_profile"
 	log info "OpenJDK version: $java_version"
 
 	copy_regions_list="[]"
