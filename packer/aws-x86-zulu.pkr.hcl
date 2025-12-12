@@ -90,7 +90,7 @@ source "amazon-ebs" "x86_64" {
   region           = "${var.region}"
   source_ami       = "${data.amazon-ami.x86_64.id}"
   #instance_type    = "t2.large"
-  spot_instance_types = ["t2.large"]
+  spot_instance_types = ["t3.large"]
   spot_price          = "auto"
 
   ssh_interface = "public_ip"
