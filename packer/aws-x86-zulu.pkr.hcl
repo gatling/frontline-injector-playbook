@@ -55,6 +55,7 @@ variable "copy_regions" {
 
 variable "aws_profile" {
   type = string
+  default = null
 }
 
 variable "build_id" {
