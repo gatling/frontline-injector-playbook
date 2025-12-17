@@ -6,7 +6,7 @@
 
 - name: Test task Zulu
   debug: 
-    var: ansible_architecture
+    var: ansible_facts["architecture"]
 
 # -------------------------------------------------
 # Azul API Doc:
