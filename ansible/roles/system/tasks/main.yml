@@ -4,13 +4,13 @@
   lineinfile:
     dest: /etc/pam.d/common-session
     line: 'session    required     pam_limits.so'
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts["os_family"] == 'Debian'
 
 - name: Add pam_limits.so to sshd file
   lineinfile:
     dest: /etc/pam.d/sshd
     line: 'session    required     pam_limits.so'
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts["os_family"] == 'RedHat'
 
 - name: Add /etc/sysctl.d/99-gatling.conf
   copy:
@@ -32,7 +32,7 @@
     path: /etc/systemd/system.conf.d/50-limits.conf
     regexp: 'DefaultLimitNOFILE=.*'
     replace: 'DefaultLimitNOFILE=1048576:1048576'
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts["os_family"] == 'RedHat'
 
 - name: systemd-coredump to 0
   lineinfile:
