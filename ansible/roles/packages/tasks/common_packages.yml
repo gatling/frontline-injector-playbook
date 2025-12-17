@@ -6,7 +6,7 @@
       - jq
       - systemd-coredump
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts["os_family"] == 'Debian'
 
 - name: install usefull packages
   dnf:
@@ -15,4 +15,4 @@
       - jq
       - libxcrypt-compat
     state: latest
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts["os_family"] == 'RedHat'

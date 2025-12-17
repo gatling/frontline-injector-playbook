@@ -6,7 +6,7 @@
 
 - name: Test task Zulu
   debug: 
-    var: ansible_architecture
+    var: ansible_facts["architecture"]
 
 # -------------------------------------------------
 # Azul API Doc:
@@ -30,7 +30,7 @@
     dest: "{{ install_path }}"
     remote_src: yes
   register: zulu_jdk_downloaded
-  when: ansible_architecture != "x86_64"
+  when: ansible_facts["architecture"] != "x86_64"
 
 
 - name: show name
