@@ -68,7 +68,7 @@ source "googlecompute" "x86_64" {
   image_family            = "${var.image_family}"
   image_name              = "${var.image_name}"
   project_id              = "${var.project_id}"
-  source_image_family     = "debian-12"
+  source_image_family     = "debian-13"
   ssh_username            = "${var.ssh_username}"
   zone                    = "${var.zone}"
   image_storage_locations = ["eu"]
