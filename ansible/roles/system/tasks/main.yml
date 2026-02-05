@@ -22,7 +22,7 @@
 
 - name: Update limits.conf
   blockinfile:
-    dest: /etc/security/limits.conf
+    dest: /etc/security/limits.d/99-gatling.conf
     block: |
       *              hard     nofile          1048576
       *              soft     nofile          1048576
