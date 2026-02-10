@@ -20,6 +20,13 @@
 - name: Apply /etc/sysctl.d/99-gatling.conf to make sure limits can be changed
   command: sysctl -p /etc/sysctl.d/99-gatling.conf
 
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path:  /etc/security/limits.d/
+    state: directory
+    mode: '0755'
+    recurse: true
+
 - name: Update limits.conf
   blockinfile:
     dest: /etc/security/limits.d/99-gatling.conf
