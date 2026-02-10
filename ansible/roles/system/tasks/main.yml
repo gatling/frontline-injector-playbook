@@ -31,6 +31,7 @@
 
 - name: Update limits.conf
   blockinfile:
+    create: true
     dest: /etc/security/limits.d/99-gatling.conf
     block: |
       *              hard     nofile          1048576
