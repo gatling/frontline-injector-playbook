@@ -36,7 +36,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: "./creds.json"
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
         run: |
-          ./build-gcp-x86-graal.sh \ 
+          ./build-gcp-x86-graal.sh \
             --java-major 25 \
             --graalvm-version 25.0.2 \
             --project-id "$GOOGLE_PROJECT_ID" \
