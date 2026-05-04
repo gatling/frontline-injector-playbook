@@ -60,7 +60,7 @@ function run
 	copy_regions_list="[]"
 	if [ $copy_regions == "true" ]
 	then
-    copy_regions_list=$($AWS_CLI ec2 describe-regions --region=eu-west-3 --query "Regions[?RegionName != 'eu-west-3'].RegionName" --output json | tr -s '[:blank:]' ' ')
+    copy_regions_list=$($AWS_CLI ec2 describe-regions --region=eu-west-3 --query "Regions[?RegionName != 'eu-west-3'].RegionName" --output json | tr -s '[:blank:]' ' ' | grep -v me-south-1 )
 	  log info "Copy regions: $copy_regions_list"
 	fi
 
