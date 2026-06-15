@@ -16,7 +16,7 @@ jobs:
 
 
       - name: Setup Packer
-        uses: hashicorp-contrib/setup-packer@v3
+        uses: hashicorp-contrib/setup-packer@v4
         with:
           packer-version: '1.11.2'
 
