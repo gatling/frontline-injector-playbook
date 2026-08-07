@@ -20,6 +20,10 @@ variable "graalvm_version" {
   type = string
 }
 
+variable "javavm_version" {
+  type = string
+}
+
 variable "java_bundle_type" {
   type    = string
   default = "jdk"
@@ -118,6 +122,7 @@ build {
   provisioner "shell" {
    environment_vars = [
     "GRAALVM_VERSION=${var.graalvm_version}",
+    "JAVAVM_VERSION==${var.javavm_version}",
     "JAVA_MAJOR=${var.java_major}",
   ]
 

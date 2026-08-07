@@ -8,10 +8,11 @@ AWS_CLI=$(which aws)
 
 function usage
 {
-    echo "usage: $0 --java-major MAJOR --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
+    echo "usage: $0 --java-major MAJOR  --javavm-version VERSION --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
     echo "  --graalvm-version    : Graalvm version with minor";
+    echo "  --javavm-version    : Java version with inovative number and minor";
     echo "  --copy-regions      : true or false";
     echo "  --profile           : AWS Profile";
     echo "  --latest            : Want latest ?";
@@ -28,6 +29,7 @@ function parse_args
       case "$1" in
           --java-major )         java_major="$2";       shift;;
           --graalvm-version )    graalvm_version="$2";  shift;;
+          --javavm-version )     javavm_version="$2";   shift;;
           --copy-regions )       copy_regions="$2";     shift;;
           --profile )            aws_profile="$2";      shift;;
           --latest )             latest="$2";           shift;;
@@ -38,7 +40,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}"  ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}" || -z "${javavm_version}"  ]]; then
       echo "Invalid arguments"
       usage
       exit 1;
@@ -48,7 +50,6 @@ function parse_args
 
 function run
 {
-
   parse_args "$@"
 
   . lib/log.sh
@@ -83,10 +84,10 @@ function run
 	  -var "build_id=$build_id" \
 	  -var "java_major=$java_major" \
 	  -var "graalvm_version=$graalvm_version" \
+	  -var "javavm_version=$javavm_version" \
 	  -var "copy_regions=$copy_regions_list" \
 	  -var "ami_description=$ami_description" \
 	  packer/aws-x86-graal.pkr.hcl
 }
-
 
 run "$@";

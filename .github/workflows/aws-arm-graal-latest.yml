@@ -29,10 +29,8 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
 
-
       - name: Build image from template
         run: cd packer; packer init aws-arm-graal.pkr.hcl
 
-
       - name: Build image from template
-        run: ./build-aws-arm-graal.sh --java-major 25 --graalvm-version 25.0.2 --copy-regions true --profile default --latest true
+        run: ./build-aws-arm-graal.sh --java-major 25 --graalvm-version 25.2.4  --javavm-version 25i2-25.0.4  --copy-regions true --profile default --latest true
