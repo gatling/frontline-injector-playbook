@@ -11,10 +11,10 @@ sudo su <<EOT
 mkdir -p /opt
 cd /opt
 
-curl -LO -fhttps://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_VERSION}/graalvm-community-jdk-${JAVAVM_VERSION}_linux-x64_bin.tar.gz
+curl -LO -fhttps://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_JDK_TAG}/graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz
 
-tar -xzf graalvm-community-jdk-${JAVAVM_VERSION}_linux-x64_bin.tar.gz || exit 1
-rm -f graalvm-community-jdk-${JAVAVM_VERSION}_linux-x64_bin.tar.gz || exit 1
+tar -xzf graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz || exit 1
+rm -f graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz || exit 1
 
 p=\$(ls -t | head -1)
 ln -s  ./"\$p"  ./graalvm

@@ -15,12 +15,12 @@ variable "java_major" {
   type = string
 }
 
-variable "graalvm_version" {
+variable "graalvm_jdk_tag" {
   type = string
 }
 
 
-variable "javavm_version" {
+variable "graalvm_jdk_version" {
   type = string
 }
 
@@ -104,8 +104,8 @@ build {
 
   provisioner "shell" {
    environment_vars = [
-    "GRAALVM_VERSION=${var.graalvm_version}",
-    "JAVAVM_VERSION=${var.javavm_version}",
+    "GRAALVM_JDK_TAG=${var.graalvm_jdk_tag}",
+    "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
     "JAVA_MAJOR=${var.java_major}",
   ]
 
