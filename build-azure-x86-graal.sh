@@ -8,10 +8,11 @@ PACKER=$(which packer)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR --graalvm-version VERSION --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--help]"
+    echo "usage: $0  --java-major MAJOR --javavm-version VERSION --graalvm-version VERSION --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--help]"
     echo "   ";
     echo "  --java-major        : Java major version";
     echo "  --graalvm-version    : Graalvm version with minor";
+    echo "  --javavm-version    : Java version with inovative number and minor";
     echo "  --client-id         : Azure Client ID";
     echo "  --client-secret     : Azure Client Secret";
     echo "  --subscription-id   : Azure Subscription ID";
@@ -29,6 +30,7 @@ function parse_args
   while [ "$1" != "" ]; do
       case "$1" in
           --java-major )         java_major="$2";       shift;;
+          --javavm-version )     javavm_version="$2";   shift;;
           --graalvm-version )    graalvm_version="$2";       shift;;
           --client-id )          client_id="$2";        shift;;
           --client-secret )      client_secret="$2";    shift;;
@@ -42,7 +44,7 @@ function parse_args
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" || -z "${graalvm_version}" ]]; then
+    if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" || -z "${graalvm_version}" || -z "${javavm_version}" ]]; then
       echo "Invalid arguments"
       usage
       exit
@@ -70,6 +72,7 @@ function run
 	$PACKER build \
 	  -var "java_major=$java_major" \
 	  -var "graalvm_version=$graalvm_version" \
+	  -var "javavm_version=$javavm_version" \
 	  -var "client_id=$client_id" \
 	  -var "client_secret=$client_secret" \
 	  -var "subscription_id=$subscription_id" \
