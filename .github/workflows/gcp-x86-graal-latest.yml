@@ -19,10 +19,8 @@ jobs:
         with:
             packer-version: '1.11.2'
 
-
       - name: Build image from template
         run: cd packer; packer init gcp-x86-graal.pkr.hcl
-
 
       - name: Configure GCP Credentials
         run: |
@@ -36,4 +34,4 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: "./creds.json"
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
         run: |
-          ./build-gcp-x86-graal.sh --java-major 25  --graalvm-version 25.0.2  --project-id "$GOOGLE_PROJECT_ID"  --latest true
+          ./build-gcp-x86-graal.sh --java-major 25 --graalvm-jdk-tag 25.2.4  --graalvm-jdk-version 25i2-25.0.4 --project-id "$GOOGLE_PROJECT_ID"  --latest true

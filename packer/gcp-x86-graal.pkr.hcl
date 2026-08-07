@@ -19,7 +19,11 @@ variable "java_major" {
   type = string
 }
 
-variable "graalvm_version" {
+variable "graalvm_jdk_tag" {
+  type = string
+}
+
+variable "graalvm_jdk_version" {
   type = string
 }
 
@@ -74,7 +78,7 @@ locals {
 
 
 source "googlecompute" "x86_64" {
-  image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.graalvm_version} (${var.build_id})", "+", "-")
+  image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.graalvm_jdk_tag} (${var.build_id})", "+", "-")
   image_family            = "${var.image_family}"
   image_name              = "${var.image_name}"
   project_id              = "${var.project_id}"
@@ -94,8 +98,9 @@ build {
 
   provisioner "shell" {
    environment_vars = [
-    "GRAALVM_VERSION=${var.graalvm_version}",
+    "GRAALVM_JDK_TAG=${var.graalvm_jdk_tag}",
     "JAVA_MAJOR=${var.java_major}",
+    "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
   ]
 
     
