@@ -23,6 +23,10 @@ variable "graalvm_version" {
   type = string
 }
 
+variable "javavm_version" {
+  type = string
+}
+
 variable "java_bundle_type" {
   type    = string
   default = "jre"
@@ -96,6 +100,7 @@ build {
    environment_vars = [
     "GRAALVM_VERSION=${var.graalvm_version}",
     "JAVA_MAJOR=${var.java_major}",
+    "JAVAVM_VERSION=${var.javavm_version}",
   ]
 
     

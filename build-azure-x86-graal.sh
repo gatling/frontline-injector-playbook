@@ -31,7 +31,7 @@ function parse_args
       case "$1" in
           --java-major )         java_major="$2";       shift;;
           --javavm-version )     javavm_version="$2";   shift;;
-          --graalvm-version )    graalvm_version="$2";       shift;;
+          --graalvm-version )    graalvm_version="$2";  shift;;
           --client-id )          client_id="$2";        shift;;
           --client-secret )      client_secret="$2";    shift;;
           --subscription-id )    subscription_id="$2";  shift;;
