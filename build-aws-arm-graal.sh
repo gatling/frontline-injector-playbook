@@ -8,14 +8,15 @@ AWS_CLI=$(which aws)
 
 function usage
 {
-    echo "usage: $0 --java-major MAJOR --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
+    echo "usage: $0 --java-major MAJOR  --graalvm-jdk-version VERSION --graalvm-jdk-tag VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
     echo "   ";
-    echo "  --java-major        : Java major version";
-    echo "  --graalvm-version    : Graalvm version with minor";
-    echo "  --copy-regions      : true or false";
-    echo "  --profile           : AWS Profile";
-    echo "  --latest            : Want latest ?";
-    echo "  --help              : This message";
+    echo "  --java-major             : Java major version";
+    echo "  --graalvm-jdk-version    : Graalvm jdk version with inovative number and minor";
+    echo "  --graalvm-jdk-tag        : Graalvm jdk version tag";
+    echo "  --copy-regions           : true or false";
+    echo "  --profile                : AWS Profile";
+    echo "  --latest                 : Want latest ?";
+    echo "  --help                   : This message";
 }
 
 function parse_args
@@ -26,19 +27,20 @@ function parse_args
   # named args
   while [ "$1" != "" ]; do
       case "$1" in
-          --java-major )         java_major="$2";       shift;;
-          --graalvm-version )    graalvm_version="$2";       shift;;
-          --copy-regions )       copy_regions="$2";     shift;;
-          --profile )            aws_profile="$2";      shift;;
-          --latest )             latest="$2";           shift;;
-          --help )               usage;                 exit;; # quit and show usage
-          * )                    args+=("$1")           # if no match, add it to the positional args
+          --java-major )                java_major="$2";       shift;;
+          --graalvm-jdk-tag )           graalvm_jdk_tag="$2";       shift;;
+          --graalvm-jdk-version )       graalvm_jdk_version="$2";   shift;;
+          --copy-regions )              copy_regions="$2";     shift;;
+          --profile )                   aws_profile="$2";      shift;;
+          --latest )                    latest="$2";           shift;;
+          --help )                      usage;                 exit;; # quit and show usage
+          * )                           args+=("$1")           # if no match, add it to the positional args
       esac
       shift # move to next kv pair
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_jdk_tag}" || -z "${graalvm_jdk_version}"  ]]; then
       echo "Invalid arguments"
       usage
       exit;
@@ -81,7 +83,8 @@ function run
 	  -var "aws_profile=$aws_profile" \
 	  -var "build_id=$build_id" \
 	  -var "java_major=$java_major" \
-	  -var "graalvm_version=$graalvm_version" \
+	  -var "graalvm_jdk_tag=$graalvm_jdk_tag" \
+	  -var "graalvm_jdk_version=$graalvm_jdk_version" \
 	  -var "copy_regions=$copy_regions_list" \
 	  -var "ami_description=$ami_description" \
 	  packer/aws-arm-graal.pkr.hcl
