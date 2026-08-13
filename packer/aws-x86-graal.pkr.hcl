@@ -4,10 +4,10 @@
 
 packer {
   required_plugins {
-      amazon = {
-        version = ">= 1.3.1"
-        source = "github.com/hashicorp/amazon"
-      }
+    amazon = {
+      version = ">= 1.3.1"
+      source  = "github.com/hashicorp/amazon"
+    }
   }
 }
 
@@ -16,7 +16,11 @@ variable "java_major" {
 }
 
 
-variable "graalvm_version" {
+variable "graalvm_jdk_tag" {
+  type = string
+}
+
+variable "graalvm_jdk_version" {
   type = string
 }
 
@@ -26,12 +30,12 @@ variable "java_bundle_type" {
 }
 
 variable "java_vendor" {
-  type = string
+  type    = string
   default = "GraalVM"
 }
 
 variable "kernel_version" {
-  type = string
+  type    = string
   default = "kernel-6"
 }
 
@@ -42,7 +46,7 @@ variable "ami" {
 }
 
 variable "region" {
-  type = string
+  type    = string
   default = "eu-west-3"
 }
 
@@ -78,34 +82,34 @@ data "amazon-ami" "x86_64" {
 }
 
 source "amazon-ebs" "x86_64" {
-  ami_description  = "${var.ami_description}"
-  ami_groups       = ["all"]
-  ami_name         = replace("Gatling Enterprise Injector x86_64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
-  ami_regions      = var.copy_regions
-  region           = "${var.region}"
-  source_ami       = "${data.amazon-ami.x86_64.id}"
+  ami_description = "${var.ami_description}"
+  ami_groups      = ["all"]
+  ami_name        = replace("Gatling Enterprise Injector x86_64 GraalVM ${var.graalvm_jdk_tag} (${var.build_id})", "+", "-")
+  ami_regions     = var.copy_regions
+  region          = "${var.region}"
+  source_ami      = "${data.amazon-ami.x86_64.id}"
   #instance_type    = "t2.large"
-  spot_instance_types = ["t2.large","t3.large","t2.medium","t2.xlarge"]
+  spot_instance_types = ["t2.large", "t3.large", "t2.medium", "t2.xlarge"]
   spot_price          = "auto"
 
   ssh_interface = "public_ip"
   ssh_username  = "ec2-user"
 
-	profile = "${var.aws_profile}"
+  profile = "${var.aws_profile}"
 
   tags = {
-    Name         = replace("Gatling Enterprise Injector x86_64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
+    Name           = replace("Gatling Enterprise Injector x86_64 GraalVM ${var.graalvm_jdk_tag} (${var.build_id})", "+", "-")
     JavaBundleType = "${var.java_bundle_type}"
     JavaVendor     = "${var.java_vendor}"
-    JavaVersion    = "${var.graalvm_version}"
+    JavaVersion    = "${var.graalvm_jdk_tag}"
     KernelVersion  = "${var.kernel_version}"
   }
 
-   # launch_block_device_mappings {
-   #      device_name = "/dev/xvda"
-   #      volume_size = 3
-   #      delete_on_termination = true
-   #  }
+  # launch_block_device_mappings {
+  #      device_name = "/dev/xvda"
+  #      volume_size = 3
+  #      delete_on_termination = true
+  #  }
 }
 
 # -----------------------------------------------
@@ -116,20 +120,21 @@ build {
   sources = ["source.amazon-ebs.x86_64"]
 
   provisioner "shell" {
-   environment_vars = [
-    "GRAALVM_VERSION=${var.graalvm_version}",
-    "JAVA_MAJOR=${var.java_major}",
-  ]
+    environment_vars = [
+      "GRAALVM_JDK_TAG=${var.graalvm_jdk_tag}",
+      "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
+      "JAVA_MAJOR=${var.java_major}",
+    ]
 
-    
-    scripts= [
+
+    scripts = [
       "remote-script/01-wait-cloud-init-ends.sh",
       "remote-script/02-update-system.sh",
       "remote-script/03-install-commons.sh",
       "remote-script/05-graalvm-setup-x86.sh",
       "remote-script/06-system.sh",
       "remote-script/07-cleanup.sh"
-      ]
+    ]
   }
-  
+
 }

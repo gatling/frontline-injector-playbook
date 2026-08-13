@@ -8,13 +8,14 @@ GCP_CLI=$(which gcloud)
 
 function usage
 {
-    echo "usage: $0  --java-major MAJOR  --graalvm-version VERSION --project-id PROJECT_ID --latest [true|false] [--help]"
+    echo "usage: $0  --java-major MAJOR --graalvm-jdk-version VERSION  --graalvm-jdk-tag VERSION --project-id PROJECT_ID --latest [true|false] [--help]"
     echo "   ";
-    echo "  --java-major        : Java major version";
-    echo "  --graalvm-version    : Graalvm version with minor";
-    echo "  --project-id        : GCP project id";
-    echo "  --latest            : Want latest ?";
-    echo "  --help              : This message";
+    echo "  --java-major             : Java major version";
+    echo "  --graalvm-jdk-version    : Graalvm jdk version with inovative number and minor";
+    echo "  --graalvm-jdk-tag        : Graalvm jdk version tag";
+    echo "  --project-id             : GCP project id";
+    echo "  --latest                 : Want latest ?";
+    echo "  --help                   : This message";
 }
 
 function parse_args
@@ -25,21 +26,22 @@ function parse_args
   # named args
   while [ "$1" != "" ]; do
       case "$1" in
-          --graalvm-version )    graalvm_version="$2";       shift;;
-          --java-major )         java_major="$2";       shift;;
-          --project-id )         project_id="$2";       shift;;
-          --latest )             latest="$2";           shift;;
-          --help )               usage;                 exit;; # quit and show usage
-          * )                    args+=("$1")           # if no match, add it to the positional args
+          --graalvm-jdk-tag )         graalvm_jdk_tag="$2";  shift;;
+          --graalvm-jdk-version )     graalvm_jdk_version="$2";   shift;;
+          --java-major )              java_major="$2";       shift;;
+          --project-id )              project_id="$2";       shift;;
+          --latest )                  latest="$2";           shift;;
+          --help )                    usage;                 exit;; # quit and show usage
+          * )                         args+=("$1")           # if no match, add it to the positional args
       esac
       shift # move to next kv pair
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${project_id}" || -z "${latest}" || -z "${graalvm_version}" ]]; then
+  if [[ -z "${java_major}" || -z "${project_id}" || -z "${latest}" || -z "${graalvm_jdk_tag}" || -z "${graalvm_jdk_version}" ]]; then
       echo "Invalid arguments"
       usage
-      exit;
+      exit 1;
   fi
 
 }
@@ -55,7 +57,7 @@ function run
 
   log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
   log info "Project ID: ${project_id} "
-  log info "OpenJDK version: $graalvm_version"
+  log info "OpenJDK version: $graalvm_jdk_tag"
 
 
   image_name="graalvm-openjdk-${java_major}-${build_id}"
@@ -74,7 +76,8 @@ function run
 
   ${PACKER} build \
    -var "java_major=$java_major" \
-   -var "graalvm_version=$graalvm_version" \
+   -var "graalvm_jdk_tag=$graalvm_jdk_tag" \
+   -var "graalvm_jdk_version=$graalvm_jdk_version" \
    -var "project_id=$project_id" \
    -var "build_id=$build_id" \
    -var "image_name=$image_name" \

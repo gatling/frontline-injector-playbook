@@ -16,22 +16,22 @@ variable "java_bundle_type" {
 }
 
 variable "java_vendor" {
-  type = string
+  type    = string
   default = "zulu"
 }
 
 variable "kernel_version" {
-  type = string
+  type    = string
   default = "kernel-6"
 }
 
 variable "ami" {
-  type = string
+  type    = string
   default = "al2023-ami-2023.*-kernel-6.12-arm64"
 }
 
 variable "region" {
-  type = string
+  type    = string
   default = "eu-west-3"
 }
 
@@ -40,7 +40,7 @@ variable "copy_regions" {
 }
 
 variable "aws_profile" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -68,15 +68,15 @@ data "amazon-ami" "arm64" {
 }
 
 source "amazon-ebs" "arm64" {
-  skip_create_ami  = false
-  ami_description  = "${var.ami_description}"
-  ami_groups       = ["all"]
-  ami_name         = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
-  ami_regions      = var.copy_regions
-  region           = "${var.region}"
-  source_ami       = "${data.amazon-ami.arm64.id}"
+  skip_create_ami = false
+  ami_description = "${var.ami_description}"
+  ami_groups      = ["all"]
+  ami_name        = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
+  ami_regions     = var.copy_regions
+  region          = "${var.region}"
+  source_ami      = "${data.amazon-ami.arm64.id}"
   #instance_type    = "t2.large"
-  spot_instance_types =  ["c6g.large","c6g.xlarge","c6g.medium","c6gd.xlarge"]
+  spot_instance_types = ["c6g.large", "c6g.xlarge", "c6g.medium", "c6gd.xlarge"]
   spot_price          = "auto"
 
   ssh_interface = "public_ip"
@@ -86,7 +86,7 @@ source "amazon-ebs" "arm64" {
   profile = (var.aws_profile != null && var.aws_profile != "") ? var.aws_profile : null
 
   tags = {
-    Name         = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
+    Name           = replace("Gatling Enterprise Injector arm64 OpenJDK ${var.java_version} (${var.build_id})", "+", "-")
     JavaBundleType = "${var.java_bundle_type}"
     JavaVendor     = "${var.java_vendor}"
     JavaVersion    = "${var.java_version}"

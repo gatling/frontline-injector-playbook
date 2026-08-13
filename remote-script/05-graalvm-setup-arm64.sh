@@ -8,21 +8,17 @@ echo "------------------------------------------------------------------------"
 
 
 sudo su <<EOT
-
 mkdir -p /opt
 cd /opt
 
-curl -LO -f https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${GRAALVM_VERSION}/graalvm-community-jdk-${GRAALVM_VERSION}_linux-aarch64_bin.tar.gz
+curl -LO -f https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_JDK_TAG}/graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-aarch64_bin.tar.gz
 
-
-tar -xzf graalvm-community-jdk-${GRAALVM_VERSION}_linux-aarch64_bin.tar.gz || exit 1
-rm -f graalvm-community-jdk-${GRAALVM_VERSION}_linux-aarch64_bin.tar.gz || exit 1
-
+tar -xzf graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-aarch64_bin.tar.gz || exit 1
+rm -f graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-aarch64_bin.tar.gz || exit 1
 
 p=\$(ls -t | head -1)
 ln -s  ./"\$p"  ./graalvm
 echo "ln -s  ./\$p   ./graalvm"
-
 
 touch /etc/profile.d/graalvm.sh
 chown root:root /etc/profile.d/graalvm.sh
@@ -33,5 +29,4 @@ echo "export PATH=/opt/graalvm/bin:\$PATH" >> /etc/profile.d/graalvm.sh
 echo "export JAVA_HOME=/opt/graalvm" >> /etc/profile.d/graalvm.sh
 
 ln -s /opt/graalvm/bin/java /usr/bin/java
-
 EOT

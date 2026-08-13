@@ -15,10 +15,14 @@ variable "java_major" {
   type = string
 }
 
-variable "graalvm_version" {
+variable "graalvm_jdk_tag" {
   type = string
 }
 
+
+variable "graalvm_jdk_version" {
+  type = string
+}
 
 variable "java_bundle_type" {
   type    = string
@@ -99,19 +103,20 @@ build {
 
 
   provisioner "shell" {
-   environment_vars = [
-    "GRAALVM_VERSION=${var.graalvm_version}",
-    "JAVA_MAJOR=${var.java_major}",
-  ]
+    environment_vars = [
+      "GRAALVM_JDK_TAG=${var.graalvm_jdk_tag}",
+      "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
+      "JAVA_MAJOR=${var.java_major}",
+    ]
 
-    
-    scripts= [
+
+    scripts = [
       "remote-script/02-debian-update-system.sh",
       "remote-script/03-debian-install-commons.sh",
       "remote-script/05-graalvm-setup-x86.sh",
       "remote-script/06-system.sh",
       "remote-script/07-debian-cleanup.sh"
-      ]
+    ]
   }
 
 }
