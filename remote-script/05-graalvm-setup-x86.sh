@@ -1,17 +1,15 @@
 #!/usr/bin/bash
 set -Eeuo pipefail
 
-
 echo "------------------------------------------------------------------------"
 echo "-- installing java                                                    --"
 echo "------------------------------------------------------------------------"
-
 
 sudo su <<EOT
 mkdir -p /opt
 cd /opt
 
-curl -LO -f https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_JDK_TAG}/graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz
+curl -LO -f https://github.com/graalvm/graalvm-ce-builds/releases/download/graal-${GRAALVM_VERSION}/graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz
 
 tar -xzf graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz || exit 1
 rm -f graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz || exit 1

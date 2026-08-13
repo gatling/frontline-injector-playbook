@@ -15,7 +15,11 @@ variable "java_major" {
   type = string
 }
 
-variable "graalvm_jdk_tag" {
+variable "javavm_version" {
+  type = string
+}
+
+variable "graalvm_version" {
   type = string
 }
 
@@ -82,7 +86,7 @@ data "amazon-ami" "arm64" {
 source "amazon-ebs" "arm64" {
   ami_description = "${var.ami_description}"
   ami_groups      = ["all"]
-  ami_name        = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_jdk_tag} (${var.build_id})", "+", "-")
+  ami_name        = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
   ami_regions     = var.copy_regions
   region          = "${var.region}"
   source_ami      = "${data.amazon-ami.arm64.id}"
@@ -96,11 +100,13 @@ source "amazon-ebs" "arm64" {
   profile = "${var.aws_profile}"
 
   tags = {
-    Name           = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_jdk_tag} (${var.build_id})", "+", "-")
-    JavaBundleType = "${var.java_bundle_type}"
-    JavaVendor     = "${var.java_vendor}"
-    JavaVersion    = "${var.graalvm_jdk_tag}"
-    KernelVersion  = "${var.kernel_version}"
+    Name              = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
+    JavaBundleType    = "${var.java_bundle_type}"
+    JavaVendor        = "${var.java_vendor}"
+    JavaVersion       = "${var.javavm_version}"
+    GraalVMVersion    = "${var.graalvm_version}"
+    GraalVMJdkVersion = "${var.graalvm_jdk_version}"
+    KernelVersion     = "${var.kernel_version}"
   }
   # launch_block_device_mappings {
   #      device_name = "/dev/xvda"
@@ -118,11 +124,10 @@ build {
 
   provisioner "shell" {
     environment_vars = [
-      "GRAALVM_JDK_TAG=${var.graalvm_jdk_tag}",
+      "GRAALVM_VERSION=${var.graalvm_version}",
       "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
       "JAVA_MAJOR=${var.java_major}",
     ]
-
 
     scripts = [
       "remote-script/01-wait-cloud-init-ends.sh",

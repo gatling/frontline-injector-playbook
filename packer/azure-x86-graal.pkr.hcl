@@ -10,15 +10,13 @@ packer {
   }
 }
 
-
 variable "java_major" {
   type = string
 }
 
-variable "graalvm_jdk_tag" {
+variable "graalvm_version" {
   type = string
 }
-
 
 variable "graalvm_jdk_version" {
   type = string
@@ -101,14 +99,12 @@ source "azure-arm" "x86_64" {
 build {
   sources = ["source.azure-arm.x86_64"]
 
-
   provisioner "shell" {
     environment_vars = [
-      "GRAALVM_JDK_TAG=${var.graalvm_jdk_tag}",
+      "GRAALVM_VERSION=${var.graalvm_version}",
       "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
       "JAVA_MAJOR=${var.java_major}",
     ]
-
 
     scripts = [
       "remote-script/02-debian-update-system.sh",
@@ -120,5 +116,3 @@ build {
   }
 
 }
-
-
