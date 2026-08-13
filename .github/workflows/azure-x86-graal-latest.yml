@@ -14,7 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-
       - name: Setup Packer
         uses: hashicorp-contrib/setup-packer@v4
         with:
@@ -32,13 +31,4 @@ jobs:
           SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           IMAGE_VERSION: ${{ github.event.inputs.image_version }}
-        run: |
-          ./build-azure-x86-graal.sh \
-            --java-major 25 \
-            --graalvm-jdk-tag 25.2.4  \
-            --graalvm-jdk-version 25i2-25.0.4 \
-            --client-id "$CLIENT_ID" \
-            --client-secret "$CLIENT_SECRET" \
-            --subscription-id "$SUBSCRIPTION_ID" \
-            --tenant-id "$TENANT_ID" \
-            --image-version "$IMAGE_VERSION"
+        run: ./build-azure-x86-graal.sh  --java-major 25 --graalvm-version 25.2.4  --graalvm-jdk-version 25i2-25.0.4 --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET"  --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION"
