@@ -77,7 +77,7 @@ locals {
 }
 
 source "googlecompute" "x86_64" {
-  image_description       = replace("Gatling Enterprise Injector x86 OpenJDK ${var.graalvm_version} (${var.build_id})", "+", "-")
+  image_description       = replace("Gatling Enterprise Injector x86 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
   image_family            = "${var.image_family}"
   image_name              = "${var.image_name}"
   project_id              = "${var.project_id}"
@@ -97,8 +97,8 @@ build {
   provisioner "shell" {
     environment_vars = [
       "GRAALVM_VERSION=${var.graalvm_version}",
-      "JAVA_MAJOR=${var.java_major}",
       "GRAALVM_JDK_VERSION=${var.graalvm_jdk_version}",
+      "JAVA_MAJOR=${var.java_major}",
     ]
 
     scripts = [
@@ -109,5 +109,4 @@ build {
       "remote-script/07-cleanup.sh"
     ]
   }
-
 }
