@@ -94,7 +94,7 @@ build {
       "--extra-vars", "java_major=${var.java_major}",
       "--extra-vars", "java_version=${var.java_version}",
       "--extra-vars", "java_vendor=${var.java_vendor}",
-    "--extra-vars", "java_bundle_type=${var.java_bundle_type}"]
+      "--extra-vars", "java_bundle_type=${var.java_bundle_type}"]
     playbook_file = "ansible/probe.yml"
     user          = "${var.ssh_username}"
     use_proxy     = false
