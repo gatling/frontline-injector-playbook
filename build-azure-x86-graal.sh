@@ -7,9 +7,10 @@ PACKER=$(which packer)
 #PACKER_LOG=1
 
 function usage {
-  echo "usage: $0  --java-major MAJOR --graalvm-jdk-version VERSION --graalvm-version VERSION --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--help]"
+  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--help]"
   echo "   "
   echo "  --java-major             : Java major version"
+  echo "  --java-version           : Java version"
   echo "  --graalvm-jdk-version    : Graalvm jdk version with inovative number and minor"
   echo "  --graalvm-version        : Graalvm jdk version tag"
   echo "  --client-id              : Azure Client ID"
@@ -29,6 +30,10 @@ function parse_args {
     case "$1" in
       --java-major)
         java_major="$2"
+        shift
+        ;;
+      --java-version)
+        java_version="$2"
         shift
         ;;
       --graalvm-jdk-version)
@@ -69,7 +74,7 @@ function parse_args {
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" ]]; then
+  if [[ -z "${java_major}" || -z "${client_id}" || -z "${client_secret}" || -z "${subscription_id}" || -z "${tenant_id}" || -z "${image_version}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" || -z "${java_version}" ]]; then
     echo "Invalid arguments"
     usage
     exit
@@ -94,15 +99,16 @@ function run {
   log info "Tenant ID: ${tenant_id} "
 
   $PACKER build \
-    -var "java_major=$java_major" \
-    -var "graalvm_version=$graalvm_version" \
-    -var "graalvm_jdk_version=$graalvm_jdk_version" \
-    -var "client_id=$client_id" \
-    -var "client_secret=$client_secret" \
-    -var "subscription_id=$subscription_id" \
-    -var "tenant_id=$tenant_id" \
-    -var "image_version=$image_version" \
-    -var "build_id=$build_id" \
+    -var "java_major=${java_major}" \
+    -var "java_version=${java_version}" \
+    -var "graalvm_version=${graalvm_version}" \
+    -var "graalvm_jdk_version=${graalvm_jdk_version}-${java_version}" \
+    -var "client_id=${client_id}" \
+    -var "client_secret=${client_secret}" \
+    -var "subscription_id=${subscription_id}" \
+    -var "tenant_id=${tenant_id}" \
+    -var "image_version=${image_version}" \
+    -var "build_id=${build_id}" \
     packer/azure-x86-graal.pkr.hcl
 }
 

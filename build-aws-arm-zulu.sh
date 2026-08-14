@@ -61,15 +61,15 @@ function run {
   parse_args "$@"
 
   . lib/log.sh
-  . lib/java-latest-version.sh $java_major "arm"
+  . lib/java-latest-version.sh "${java_major}" "arm"
 
   build_id=$(date +%s | sha1sum | cut -c -4)
 
   log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
-  log info "OpenJDK version: $java_version"
+  log info "OpenJDK version: ${java_version}"
 
   copy_regions_list="[]"
-  if [ $copy_regions == "true" ]; then
+  if [ "${copy_regions}" == "true" ]; then
     copy_regions_list=$($AWS_CLI ec2 describe-regions --region=eu-west-3 --query "Regions[?RegionName != 'eu-west-3'].RegionName" --output json | tr -s '[:blank:]' ' ' | grep -v me-south-1)
     log info "Copy regions: $copy_regions_list"
   fi
@@ -79,7 +79,7 @@ function run {
   fi
 
   ami_description="classic-openjdk-$java_major"
-  if [ $latest == "true" ]; then
+  if [ "${latest}" == "true" ]; then
     ami_description="classic-openjdk-latest"
   fi
 

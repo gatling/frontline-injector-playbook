@@ -7,9 +7,10 @@ GCP_CLI=$(which gcloud)
 #PACKER_LOG=1
 
 function usage {
-  echo "usage: $0  --java-major MAJOR --graalvm-jdk-version VERSION  --graalvm-version VERSION --project-id PROJECT_ID --latest [true|false] [--help]"
+  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --project-id PROJECT_ID --latest [true|false] [--help]"
   echo "   "
   echo "  --java-major             : Java major version"
+  echo "  --java-version           : Java version"
   echo "  --graalvm-jdk-version    : Graalvm jdk version with inovative number and minor"
   echo "  --graalvm-version        : Graalvm jdk version tag"
   echo "  --project-id             : GCP project id"
@@ -30,6 +31,10 @@ function parse_args {
         ;;
       --graalvm-jdk-version)
         graalvm_jdk_version="$2"
+        shift
+        ;;
+      --java-version)
+        java_version="$2"
         shift
         ;;
       --java-major)
@@ -54,7 +59,7 @@ function parse_args {
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${project_id}" || -z "${latest}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" ]]; then
+  if [[ -z "${java_major}" || -z "${project_id}" || -z "${latest}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" || -z "${java_version}" ]]; then
     echo "Invalid arguments"
     usage
     exit 1
@@ -75,25 +80,26 @@ function run {
   log info "OpenJDK version: $graalvm_version"
 
   image_name="graalvm-openjdk-${java_major}-${build_id}"
-  if [ $latest == "true" ]; then
+  if [ "${latest}" == "true" ]; then
     image_name="graalvm-openjdk-latest-${build_id}"
   fi
 
   image_family="graalvm-openjdk-$java_major"
-  if [ $latest == "true" ]; then
+  if [ "${latest}" == "true" ]; then
     image_family="graalvm-openjdk-latest"
   fi
   log info "Image name: $image_name"
   log info "Image family: $image_family"
 
   ${PACKER} build \
-    -var "java_major=$java_major" \
-    -var "graalvm_version=$graalvm_version" \
-    -var "graalvm_jdk_version=$graalvm_jdk_version" \
-    -var "project_id=$project_id" \
-    -var "build_id=$build_id" \
-    -var "image_name=$image_name" \
-    -var "image_family=$image_family" \
+    -var "java_major=${java_major}" \
+    -var "java_version=${java_version}" \
+    -var "graalvm_version=${graalvm_version}" \
+    -var "graalvm_jdk_version=${graalvm_jdk_version}-${java_version}" \
+    -var "project_id=${project_id}" \
+    -var "build_id=${build_id}" \
+    -var "image_name=${image_name}" \
+    -var "image_family=${image_family}" \
     ./packer/gcp-x86-graal.pkr.hcl
 
   $GCP_CLI auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
