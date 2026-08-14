@@ -57,7 +57,7 @@ function run {
   parse_args "$@"
 
   . lib/log.sh
-  . lib/java-latest-version.sh $java_major "x86"
+  . lib/java-latest-version.sh "${java_major}" "x86"
 
   build_id=$(date +%s | sha1sum | cut -c -4)
 
@@ -66,12 +66,12 @@ function run {
   log info "OpenJDK version: $java_version"
 
   image_name="classic-openjdk-${java_major}-${build_id}"
-  if [ $latest == "true" ]; then
+  if [ "${latest}" == "true" ]; then
     image_name="classic-openjdk-latest-${build_id}"
   fi
 
   image_family="classic-openjdk-$java_major"
-  if [ $latest == "true" ]; then
+  if [ "${latest}" == "true" ]; then
     image_family="classic-openjdk-latest"
   fi
   log info "Image name: $image_name"

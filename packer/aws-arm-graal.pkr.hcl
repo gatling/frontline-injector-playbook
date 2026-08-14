@@ -15,7 +15,7 @@ variable "java_major" {
   type = string
 }
 
-variable "javavm_version" {
+variable "java_version" {
   type = string
 }
 
@@ -103,7 +103,7 @@ source "amazon-ebs" "arm64" {
     Name              = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
     JavaBundleType    = "${var.java_bundle_type}"
     JavaVendor        = "${var.java_vendor}"
-    JavaVersion       = "${var.javavm_version}"
+    JavaVersion       = "${var.java_version}"
     GraalVMVersion    = "${var.graalvm_version}"
     GraalVMJdkVersion = "${var.graalvm_jdk_version}"
     KernelVersion     = "${var.kernel_version}"

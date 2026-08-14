@@ -15,6 +15,10 @@ variable "java_major" {
   type = string
 }
 
+variable "java_version" {
+  type = string
+}
+
 variable "graalvm_version" {
   type = string
 }

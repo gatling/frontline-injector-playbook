@@ -7,10 +7,10 @@ AWS_CLI=$(which aws)
 #PACKER_LOG=1
 
 function usage {
-  echo "usage: $0 --java-major MAJOR --javavm-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
+  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
   echo "   "
   echo "  --java-major             : Java major version"
-  echo "  --javavm-version         : Java jvm version"
+  echo "  --java-version           : Java version"
   echo "  --graalvm-jdk-version    : Graalvm jdk version with inovative number and minor"
   echo "  --graalvm-version        : Graalvm jdk version tag"
   echo "  --copy-regions           : true or false"
@@ -30,8 +30,8 @@ function parse_args {
         java_major="$2"
         shift
         ;;
-      --javavm-version)
-        javavm_version="$2"
+      --java-version)
+        java_version="$2"
         shift
         ;;
       --graalvm-version)
@@ -56,7 +56,7 @@ function parse_args {
         ;;
       --help)
         usage
-        exit
+        exit 1
         ;;               # quit and show usage
       *) args+=("$1") ;; # if no match, add it to the positional args
     esac
@@ -64,10 +64,10 @@ function parse_args {
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" || -z "${javavm_version}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" || -z "${java_version}" ]]; then
     echo "Invalid arguments"
     usage
-    exit
+    exit 1
   fi
 
 }
@@ -83,7 +83,7 @@ function run {
   log info "AWS profile: $aws_profile"
 
   copy_regions_list="[]"
-  if [ $copy_regions == "true" ]; then
+  if [ "${copy_regions}" == "true" ]; then
     copy_regions_list=$($AWS_CLI ec2 describe-regions --region=eu-west-3 --query "Regions[?RegionName != 'eu-west-3'].RegionName" --output json | tr -s '[:blank:]' ' ' | grep -v me-south-1)
     log info "Copy regions: $copy_regions_list"
   fi
@@ -93,21 +93,21 @@ function run {
   fi
 
   ami_description="graalvm-openjdk-$java_major"
-  if [ $latest == "true" ]; then
+  if [ "${latest}" == "true" ]; then
     ami_description="graalvm-openjdk-latest"
   fi
 
   log info "AMI description: $ami_description"
 
   $PACKER build \
-    -var "aws_profile=$aws_profile" \
-    -var "build_id=$build_id" \
-    -var "java_major=$java_major" \
-    -var "javavm_version=$javavm_version" \
-    -var "graalvm_version=$graalvm_version" \
-    -var "graalvm_jdk_version=$graalvm_jdk_version" \
-    -var "copy_regions=$copy_regions_list" \
-    -var "ami_description=$ami_description" \
+    -var "aws_profile=${aws_profile}" \
+    -var "build_id=${build_id}" \
+    -var "java_major=${java_major}" \
+    -var "java_version=${java_version}" \
+    -var "graalvm_version=${graalvm_version}" \
+    -var "graalvm_jdk_version=${graalvm_jdk_version}-${java_version}" \
+    -var "copy_regions=${copy_regions_list}" \
+    -var "ami_description=${ami_description}" \
     packer/aws-arm-graal.pkr.hcl
 }
 
