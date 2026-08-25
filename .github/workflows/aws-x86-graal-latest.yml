@@ -16,15 +16,15 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Packer
-        uses: hashicorp-contrib/setup-packer@v4
+        uses: hashicorp-contrib/setup-packer@f3a1552a94a787a7bbc433141a8f62336f72a61d # v4.0.0
         with:
           packer-version: '1.11.2'
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
