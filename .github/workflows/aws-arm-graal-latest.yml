@@ -26,7 +26,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_SELLER }}
+          role-to-assume: ${{ vars.AWS_ROLE_SELLER }}
           aws-region: eu-west-3
 
       - name: Build image from template
