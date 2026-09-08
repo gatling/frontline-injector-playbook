@@ -34,4 +34,4 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: "./creds.json"
           GOOGLE_PROJECT_ID: ${{ vars.GOOGLE_PROJECT_ID }}
         run: |
-          ./build-gcp-x86-graal.sh --java-major 25 --java-version 25.0.4 --graalvm-version 25.2.4 --graalvm-jdk-version 25i2 --project-id "$GOOGLE_PROJECT_ID" --latest true
+          ./build-gcp-x86-graal.sh --java-major 25 --java-version 25.0.4.1 --graalvm-version 25.3.4.1 --graalvm-jdk-version 25i3 --project-id "$GOOGLE_PROJECT_ID" --latest true

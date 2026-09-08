@@ -31,4 +31,4 @@ jobs:
           SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
           IMAGE_VERSION: ${{ github.event.inputs.image_version }}
-        run: ./build-azure-x86-graal.sh --java-major 25 --java-version 25.0.4 --graalvm-version 25.2.4 --graalvm-jdk-version 25i2 --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION"
+        run: ./build-azure-x86-graal.sh --java-major 25 --java-version 25.0.4.1 --graalvm-version 25.3.4.1 --graalvm-jdk-version 25i3 --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION"
