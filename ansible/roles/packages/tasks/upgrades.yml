@@ -1,15 +1,15 @@
 ---
 
 - name: Update all packages
-  apt: update_cache=yes
-  cache_valid_time: 0 # Force le rafraîchissement immédiat sans utiliser le cache local
-  autoremove: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 0 # Force le rafraîchissement immédiat sans utiliser le cache local
   when: ansible_facts["os_family"] == 'Debian'
 
 - name: Upgrade all packages
-  apt: upgrade=dist
-  cache_valid_time: 0 # Force le rafraîchissement immédiat sans utiliser le cache local
-  autoremove: yes
+  apt:
+    upgrade: dist
+    autoremove: yes
   when: ansible_facts["os_family"] == 'Debian'
 
 #- name: Make /var/lib/rpm-state for Amazon Linux issue on jdk7 upgrade
