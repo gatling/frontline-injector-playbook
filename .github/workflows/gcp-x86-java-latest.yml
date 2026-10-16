@@ -46,6 +46,6 @@ jobs:
           GOOGLE_PROJECT_ID: ${{ vars.GOOGLE_PROJECT_ID }}
         run: |
           ./build-gcp-x86-zulu.sh \
-            --java-major 26 \
+            --java-major 27 \
             --project-id "$GOOGLE_PROJECT_ID" \
             --latest true
