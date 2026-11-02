@@ -27,7 +27,7 @@ jobs:
         run: pip install ansible jmespath
 
       - name: Setup `packer`
-        uses: hashicorp/setup-packer@97ec7008e79c4247af034e505b489f47f01173a6 # main
+        uses: hashicorp/setup-packer@652a4efa801316809868f895fa28bb1d1e57eb9b # main
         with:
           version: "latest"
 
