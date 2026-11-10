@@ -1,0 +1,34 @@
+name: Azure x86 Graal browser latest
+on:
+  workflow_dispatch:
+    inputs:
+      image_version:
+        description: 'Image version (x.x.x)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Packer
+        uses: hashicorp-contrib/setup-packer@f3a1552a94a787a7bbc433141a8f62336f72a61d # v4.0.0
+        with:
+          packer-version: '1.11.2'
+
+      - name: Init Packer
+        run: cd packer; packer init azure-x86-graal.pkr.hcl
+
+        # run: packer plugins install github.com/hashicorp/azure && packer plugins install github.com/hashicorp/ansible
+
+      - name: Build image from template
+        env:
+          CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          IMAGE_VERSION: ${{ github.event.inputs.image_version }}
+        run: ./build-azure-x86-graal.sh --browser true --java-major 25 --java-version 25.0.5.0.3 --graalvm-version 25.5.5.0.3 --graalvm-jdk-version 25i5 --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION"
