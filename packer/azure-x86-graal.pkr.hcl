@@ -26,6 +26,16 @@ variable "graalvm_jdk_version" {
   type = string
 }
 
+variable "browser" {
+  description = "Also install the gatling-browser runtime (Node.js, Chrome Headless Shell), for the graalvm-browser images"
+  type        = bool
+  default     = false
+}
+
+locals {
+  flavor = var.browser ? "graalvm-browser" : "graalvm-openjdk"
+}
+
 variable "java_bundle_type" {
   type    = string
   default = "jre"
@@ -78,7 +88,7 @@ source "azure-arm" "x86_64" {
   tenant_id       = "${var.tenant_id}"
 
   managed_image_resource_group_name = "gei-prod-westeurope-rg"
-  managed_image_name                = "gei-graalvm-openjdk-${var.java_major}-prod-${var.build_id}-img"
+  managed_image_name                = "gei-${local.flavor}-${var.java_major}-prod-${var.build_id}-img"
 
   ssh_username = "${var.ssh_username}"
   location     = "${var.location}"
@@ -93,7 +103,7 @@ source "azure-arm" "x86_64" {
     subscription        = "${var.subscription_id}"
     resource_group      = "gei-prod-westeurope-rg"
     gallery_name        = "gei_prod_acg"
-    image_name          = "gei-graalvm-openjdk-${var.java_major}-prod-vid"
+    image_name          = "gei-${local.flavor}-${var.java_major}-prod-vid"
     image_version       = "${var.image_version}"
     replication_regions = ["${var.location}"]
   }
@@ -110,13 +120,18 @@ build {
       "JAVA_MAJOR=${var.java_major}",
     ]
 
-    scripts = [
-      "remote-script/02-debian-update-system.sh",
-      "remote-script/03-debian-install-commons.sh",
-      "remote-script/05-graalvm-setup-x86.sh",
-      "remote-script/06-system.sh",
-      "remote-script/07-debian-cleanup.sh"
-    ]
+    scripts = concat(
+      [
+        "remote-script/02-debian-update-system.sh",
+        "remote-script/03-debian-install-commons.sh",
+        "remote-script/05-graalvm-setup-x86.sh"
+      ],
+      var.browser ? ["remote-script/05-browser-setup.sh"] : [],
+      [
+        "remote-script/06-system.sh",
+        "remote-script/07-debian-cleanup.sh"
+      ]
+    )
   }
 
 }

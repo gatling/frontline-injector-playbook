@@ -27,6 +27,12 @@ variable "graalvm_jdk_version" {
   type = string
 }
 
+variable "browser" {
+  description = "Also install the gatling-browser runtime (Node.js, Chrome Headless Shell), for the graalvm-browser images"
+  type        = bool
+  default     = false
+}
+
 variable "java_bundle_type" {
   type    = string
   default = "jre"
@@ -77,7 +83,7 @@ locals {
 }
 
 source "googlecompute" "x86_64" {
-  image_description       = replace("Gatling Enterprise Injector x86 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
+  image_description       = replace("Gatling Enterprise Injector x86 GraalVM ${var.graalvm_version}${var.browser ? " Browser" : ""} (${var.build_id})", "+", "-")
   image_family            = "${var.image_family}"
   image_name              = "${var.image_name}"
   project_id              = "${var.project_id}"
@@ -101,12 +107,17 @@ build {
       "JAVA_MAJOR=${var.java_major}",
     ]
 
-    scripts = [
-      "remote-script/02-debian-update-system.sh",
-      "remote-script/03-debian-install-commons.sh",
-      "remote-script/05-graalvm-setup-x86.sh",
-      "remote-script/06-system.sh",
-      "remote-script/07-cleanup.sh"
-    ]
+    scripts = concat(
+      [
+        "remote-script/02-debian-update-system.sh",
+        "remote-script/03-debian-install-commons.sh",
+        "remote-script/05-graalvm-setup-x86.sh"
+      ],
+      var.browser ? ["remote-script/05-browser-setup.sh"] : [],
+      [
+        "remote-script/06-system.sh",
+        "remote-script/07-cleanup.sh"
+      ]
+    )
   }
 }

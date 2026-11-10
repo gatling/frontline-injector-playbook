@@ -7,7 +7,7 @@ PACKER=$(which packer)
 #PACKER_LOG=1
 
 function usage {
-  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--help]"
+  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --client-id CLIENT_ID --client-secret CLIENT_SECRET --subscription-id SUBSCRIPTION_ID --tenand-id TENANT_ID --image-version IMAGE_VERSION [--browser true|false] [--help]"
   echo "   "
   echo "  --java-major             : Java major version"
   echo "  --java-version           : Java version"
@@ -18,6 +18,7 @@ function usage {
   echo "  --subscription-id        : Azure Subscription ID"
   echo "  --tenant-id              : Azure Tenant ID"
   echo "  --image-version          : Azure Image Version"
+  echo "  --browser                : true to also install the gatling-browser runtime (graalvm-browser images), default false"
   echo "  --help                   : This message"
 }
 
@@ -64,6 +65,10 @@ function parse_args {
         image_version="$2"
         shift
         ;;
+      --browser)
+        browser="$2"
+        shift
+        ;;
       --help)
         usage
         exit
@@ -86,11 +91,18 @@ function run {
 
   parse_args "$@"
 
+  browser="${browser:-false}"
+  flavor="graalvm-openjdk"
+  if [ "${browser}" == "true" ]; then
+    flavor="graalvm-browser"
+  fi
+
   . lib/log.sh
   # . lib/java-latest-version.sh $java_major "x86"
 
   build_id=$(date +%s | sha1sum | cut -c -4)
 
+  log info "Flavor: $flavor"
   log info "Build Gatling Enterprise Injector x86_64 (build_id: $build_id)"
   log info "Image version: $image_version"
   log info "OpenJDK version: $graalvm_version"
@@ -109,6 +121,7 @@ function run {
     -var "tenant_id=${tenant_id}" \
     -var "image_version=${image_version}" \
     -var "build_id=${build_id}" \
+    -var "browser=${browser}" \
     packer/azure-x86-graal.pkr.hcl
 }
 

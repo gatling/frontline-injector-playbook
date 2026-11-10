@@ -27,6 +27,12 @@ variable "graalvm_jdk_version" {
   type = string
 }
 
+variable "browser" {
+  description = "Also install the gatling-browser runtime (Node.js, Chrome Headless Shell), for the graalvm-browser images"
+  type        = bool
+  default     = false
+}
+
 variable "java_bundle_type" {
   type    = string
   default = "jdk"
@@ -86,7 +92,7 @@ data "amazon-ami" "arm64" {
 source "amazon-ebs" "arm64" {
   ami_description = "${var.ami_description}"
   ami_groups      = ["all"]
-  ami_name        = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
+  ami_name        = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version}${var.browser ? " Browser" : ""} (${var.build_id})", "+", "-")
   ami_regions     = var.copy_regions
   region          = "${var.region}"
   source_ami      = "${data.amazon-ami.arm64.id}"
@@ -100,7 +106,7 @@ source "amazon-ebs" "arm64" {
   profile = "${var.aws_profile}"
 
   tags = {
-    Name              = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
+    Name              = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version}${var.browser ? " Browser" : ""} (${var.build_id})", "+", "-")
     JavaBundleType    = "${var.java_bundle_type}"
     JavaVendor        = "${var.java_vendor}"
     JavaVersion       = "${var.java_version}"
@@ -129,14 +135,19 @@ build {
       "JAVA_MAJOR=${var.java_major}",
     ]
 
-    scripts = [
-      "remote-script/01-wait-cloud-init-ends.sh",
-      "remote-script/02-update-system.sh",
-      "remote-script/03-install-commons.sh",
-      "remote-script/05-graalvm-setup-arm64.sh",
-      "remote-script/06-system.sh",
-      "remote-script/07-cleanup.sh"
-    ]
+    scripts = concat(
+      [
+        "remote-script/01-wait-cloud-init-ends.sh",
+        "remote-script/02-update-system.sh",
+        "remote-script/03-install-commons.sh",
+        "remote-script/05-graalvm-setup-arm64.sh"
+      ],
+      var.browser ? ["remote-script/05-browser-setup.sh"] : [],
+      [
+        "remote-script/06-system.sh",
+        "remote-script/07-cleanup.sh"
+      ]
+    )
   }
 
 }

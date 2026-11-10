@@ -14,6 +14,28 @@
 | `build-azure-x86-zulu.sh`  | build java from Zulu distribution for x86_64 on gcp |
 | `ami-aws-snapshot-cleanup.sh`  | remove ami and associated snapshot on all regions  |
 
+## Browser runtime
+
+The `graalvm-browser` images are the GraalVM images plus what
+[gatling-browser](https://github.com/gatling/gatling-browser) needs. GraalVM runs both JVM and JavaScript simulations, so
+one flavor covers both. The `graalvm-openjdk` and Zulu images stay without a browser.
+
+They're built by the `*-graal-browser-latest` workflows, i.e. the GraalVM build scripts with `--browser true`, which
+runs `remote-script/05-browser-setup.sh` and names the images `graalvm-browser` instead of `graalvm-openjdk`:
+
+- Node.js, from the official distribution, in `/opt/node`, for the Playwright driver, instead of the one bundled in
+  Playwright's `driver-bundle` jar. Keep `NODE_VERSION` on the latest patch of the Node.js major bundled by Playwright.
+- Chrome Headless Shell, in `/opt/ms-playwright`, installed by the Playwright CLI. Each Playwright version requires one
+  browser revision and downloads are disabled: `PLAYWRIGHT_VERSION` must be the `playwright-core` version of the
+  Playwright driver used by gatling-browser, and must be upgraded here before gatling-browser upgrades Playwright.
+- Their libraries, fontconfig and the Liberation fonts, from the distribution packages.
+
+The script sets `PLAYWRIGHT_NODEJS_PATH`, `PLAYWRIGHT_BROWSERS_PATH` and `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` in
+`/etc/profile.d/gatling-browser.sh` and `/etc/environment`. Processes started by cloud-init read neither: the load
+generator startup script must source `/etc/profile.d/gatling-browser.sh`.
+
+On Azure, the `gei-graalvm-browser-<java major>-prod-vid` image definition must exist in the `gei_prod_acg` gallery.
+
 ## Prerequisites
 
 * Install `packer` version >= 1.7.8

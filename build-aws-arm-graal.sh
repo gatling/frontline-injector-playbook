@@ -7,7 +7,7 @@ AWS_CLI=$(which aws)
 #PACKER_LOG=1
 
 function usage {
-  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
+  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--browser true|false] [--help]"
   echo "   "
   echo "  --java-major             : Java major version"
   echo "  --java-version           : Java version"
@@ -16,6 +16,7 @@ function usage {
   echo "  --copy-regions           : true or false"
   echo "  --profile                : AWS Profile"
   echo "  --latest                 : Want latest ?"
+  echo "  --browser                : true to also install the gatling-browser runtime (graalvm-browser images), default false"
   echo "  --help                   : This message"
 }
 
@@ -54,6 +55,10 @@ function parse_args {
         latest="$2"
         shift
         ;;
+      --browser)
+        browser="$2"
+        shift
+        ;;
       --help)
         usage
         exit 1
@@ -75,10 +80,17 @@ function parse_args {
 function run {
   parse_args "$@"
 
+  browser="${browser:-false}"
+  flavor="graalvm-openjdk"
+  if [ "${browser}" == "true" ]; then
+    flavor="graalvm-browser"
+  fi
+
   . lib/log.sh
 
   build_id=$(date +%s | sha1sum | cut -c -4)
 
+  log info "Flavor: $flavor"
   log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
   log info "AWS profile: $aws_profile"
 
@@ -92,9 +104,9 @@ function run {
     unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
   fi
 
-  ami_description="graalvm-openjdk-$java_major"
+  ami_description="$flavor-$java_major"
   if [ "${latest}" == "true" ]; then
-    ami_description="graalvm-openjdk-latest"
+    ami_description="$flavor-latest"
   fi
 
   log info "AMI description: $ami_description"
@@ -102,6 +114,7 @@ function run {
   $PACKER build \
     -var "aws_profile=${aws_profile}" \
     -var "build_id=${build_id}" \
+    -var "browser=${browser}" \
     -var "java_major=${java_major}" \
     -var "java_version=${java_version}" \
     -var "graalvm_version=${graalvm_version}" \
