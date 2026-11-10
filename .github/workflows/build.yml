@@ -8,8 +8,43 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # same as the default of remote-script/05-browser-setup.sh
+  PLAYWRIGHT_VERSION: 1.61.1
+
 jobs:
+  browser-setup:
+    name: Browser setup (${{ matrix.image }}, ${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["debian:trixie", "amazonlinux:2023"]
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download playwright-core
+        run: |
+          npm pack --silent "playwright-core@$PLAYWRIGHT_VERSION" --pack-destination /tmp
+          mkdir playwright-core
+          tar -xzf "/tmp/playwright-core-$PLAYWRIGHT_VERSION.tgz" --strip-components=1 -C playwright-core
+
+      - name: Run remote-script/05-browser-setup.sh and the browser smoke test
+        run: docker run --rm --volume "$PWD:/playbook:ro" "${{ matrix.image }}" bash /playbook/test/browser-setup.sh
+
   build:
     runs-on: ubuntu-latest
+    needs:
+      - browser-setup
     steps:
       - run: "true"
