@@ -19,7 +19,7 @@ echo "------------------------------------------------------------------------"
 NODE_VERSION="${NODE_VERSION:-24.22.2}"
 # The playwright-core version of the Playwright driver used by gatling-browser: it pins the Chrome Headless Shell
 # revision, which the driver doesn't download as PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set.
-PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.61.1}"
+PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.64.0}"
 
 readonly NODE_HOME=/opt/node
 readonly BROWSERS_PATH=/opt/ms-playwright

@@ -17,7 +17,7 @@ defaults:
 
 env:
   # same as the default of remote-script/05-browser-setup.sh
-  PLAYWRIGHT_VERSION: 1.61.1
+  PLAYWRIGHT_VERSION: 1.64.0
 
 jobs:
   browser-setup:
