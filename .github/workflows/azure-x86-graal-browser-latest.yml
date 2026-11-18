@@ -20,7 +20,7 @@ jobs:
           packer-version: '1.11.2'
 
       - name: Init Packer
-        run: cd packer; packer init azure-x86-graal.pkr.hcl
+        run: cd packer; packer init azure-x86-graal-browser.pkr.hcl
 
         # run: packer plugins install github.com/hashicorp/azure && packer plugins install github.com/hashicorp/ansible
 
@@ -31,4 +31,4 @@ jobs:
           SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
           IMAGE_VERSION: ${{ github.event.inputs.image_version }}
-        run: ./build-azure-x86-graal.sh --browser true --java-major 25 --java-version 25.0.5.0.3 --graalvm-version 25.5.5.0.3 --graalvm-jdk-version 25i5 --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION"
+        run: ./build-azure-x86-graal-browser.sh --java-major 25 --java-version 25.0.5.0.3 --graalvm-version 25.5.5.0.3 --graalvm-jdk-version 25i5 --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION"
