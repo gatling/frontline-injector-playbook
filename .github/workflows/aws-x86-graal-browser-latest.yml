@@ -30,7 +30,7 @@ jobs:
           aws-region: eu-west-3
 
       - name: Build image from template
-        run: cd packer; packer init aws-x86-graal.pkr.hcl
+        run: cd packer; packer init aws-x86-graal-browser.pkr.hcl
 
       - name: Build image from template
-        run: ./build-aws-x86-graal.sh --browser true --java-major 25 --java-version 25.0.5.0.3 --graalvm-version 25.5.5.0.3 --graalvm-jdk-version 25i5 --copy-regions true --profile default --latest true
+        run: ./build-aws-x86-graal-browser.sh --java-major 25 --java-version 25.0.5.0.3 --graalvm-version 25.5.5.0.3 --graalvm-jdk-version 25i5 --copy-regions true --profile default --latest true
