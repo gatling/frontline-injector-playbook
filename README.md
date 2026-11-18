@@ -11,6 +11,7 @@
 | `build-aws-x86-zulu.sh`  | build java with kernel 5.x from Zulu distribution for x86_64 on aws |
 | `build-aws-arm-zulu.sh`  | build java with kernel 5.x from Zulu distribution for arm on aws|
 | `build-gcp-x86-zulu.sh`  | build java from Zulu distribution for x86_64 on gcp |
+| `build-gcp-x86-graal-browser.sh`  | build GraalVM with the gatling-browser runtime for x86_64 on gcp (`graalvm-browser-*` families) |
 | `build-azure-x86-zulu.sh`  | build java from Zulu distribution for x86_64 on gcp |
 | `ami-aws-snapshot-cleanup.sh`  | remove ami and associated snapshot on all regions  |
 
@@ -20,8 +21,10 @@ The `graalvm-browser` images are the GraalVM images plus what
 [gatling-browser](https://github.com/gatling/gatling-browser) needs. GraalVM runs both JVM and JavaScript simulations, so
 one flavor covers both. The `graalvm-openjdk` and Zulu images stay without a browser.
 
-They're built by the `*-graal-browser-latest` workflows, i.e. the GraalVM build scripts with `--browser true`, which
-runs `remote-script/05-browser-setup.sh` and names the images `graalvm-browser` instead of `graalvm-openjdk`:
+They're built by the `*-graal-browser-latest` workflows, which run `remote-script/05-browser-setup.sh` on top of the
+GraalVM setup and name the images `graalvm-browser` instead of `graalvm-openjdk`. On GCP, the browser image has its own
+build, separate from the GraalVM one (`build-gcp-x86-graal-browser.sh`, `packer/gcp-x86-graal-browser.pkr.hcl`), so
+that each image family can change without affecting the other. The images contain:
 
 - Node.js, from the official distribution, in `/opt/node`, for the Playwright driver, instead of the one bundled in
   Playwright's `driver-bundle` jar. Keep `NODE_VERSION` on the latest patch of the Node.js major bundled by Playwright.
