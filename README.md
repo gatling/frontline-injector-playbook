@@ -13,6 +13,7 @@
 | `build-gcp-x86-zulu.sh`  | build java from Zulu distribution for x86_64 on gcp |
 | `build-gcp-x86-graal-browser.sh`  | build GraalVM with the gatling-browser runtime for x86_64 on gcp (`graalvm-browser-*` families) |
 | `build-azure-x86-zulu.sh`  | build java from Zulu distribution for x86_64 on gcp |
+| `build-azure-x86-graal-browser.sh`  | build GraalVM with the gatling-browser runtime for x86_64 on azure (`gei-graalvm-browser-<java major>-prod-vid`) |
 | `ami-aws-snapshot-cleanup.sh`  | remove ami and associated snapshot on all regions  |
 
 ## Browser runtime
@@ -22,9 +23,10 @@ The `graalvm-browser` images are the GraalVM images plus what
 one flavor covers both. The `graalvm-openjdk` and Zulu images stay without a browser.
 
 They're built by the `*-graal-browser-latest` workflows, which run `remote-script/05-browser-setup.sh` on top of the
-GraalVM setup and name the images `graalvm-browser` instead of `graalvm-openjdk`. On GCP, the browser image has its own
-build, separate from the GraalVM one (`build-gcp-x86-graal-browser.sh`, `packer/gcp-x86-graal-browser.pkr.hcl`), so
-that each image family can change without affecting the other. The images contain:
+GraalVM setup and name the images `graalvm-browser` instead of `graalvm-openjdk`. On GCP and Azure, the browser images
+have their own builds, separate from the GraalVM ones (`build-gcp-x86-graal-browser.sh`,
+`packer/gcp-x86-graal-browser.pkr.hcl`, `build-azure-x86-graal-browser.sh`, `packer/azure-x86-graal-browser.pkr.hcl`),
+so that each image can change without affecting the other. The images contain:
 
 - Node.js, from the official distribution, in `/opt/node`, for the Playwright driver, instead of the one bundled in
   Playwright's `driver-bundle` jar. Keep `NODE_VERSION` on the latest patch of the Node.js major bundled by Playwright.
