@@ -178,7 +178,17 @@ jobs:
               --query 'Images[0].Tags' --output json || echo '[]')
             result=$(jq --argjson tags "${tags:-[]}" \
               '. + {java: ($tags | map(select(.Key == "JavaVersion"))[0].Value),
+                    vendor: ($tags | map(select(.Key == "JavaVendor"))[0].Value),
                     graalvm: ($tags | map(select(.Key == "GraalVMVersion"))[0].Value)}' <<<"$result")
+          fi
+
+          # Zulu: JavaVersion is the Zulu version (25.38.201+0); the JDK version (25.0.5.1)
+          # comes from the Azul API, the line keeps the Zulu version only if it does not answer
+          zulu=$(jq -r 'select(.vendor == "zulu") | .java // empty' <<<"$result")
+          if [ -n "$zulu" ]; then
+            jdk=$(curl -fsS --max-time 20 "https://api.azul.com/metadata/v1/zulu/packages/?distro_version=${zulu%%+*}&os=linux-glibc&archive_type=tar.gz&java_package_type=jre&release_status=ga" \
+              | jq -r '[.[].java_version | map(tostring) | join(".")] | unique | first // empty' || true)
+            result=$(jq --arg jdk "$jdk" '. + {jdk: (if $jdk == "" then null else $jdk end)}' <<<"$result")
           fi
           echo "$result" | tee result.json
 
@@ -233,7 +243,10 @@ jobs:
                   "• \(.name): "
                   + (if .outcome == "success"
                      then "`\(.ami)`"
-                       + (if .graalvm then " · GraalVM \(.graalvm)" elif .java then " · Java \(.java)" else "" end)
+                       + (if .graalvm then " · GraalVM \(.graalvm)"
+                          elif .jdk then " · JDK \(.jdk) (Zulu \(.java | sub("\\+.*"; "")))"
+                          elif .java then " · Zulu \(.java | sub("\\+.*"; ""))"
+                          else "" end)
                        + " · \(.duration / 60 | floor) min"
                      else .outcome end)
                 ) | join("\n"))
