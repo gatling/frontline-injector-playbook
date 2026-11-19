@@ -37,7 +37,9 @@ images=$(yq -o=json '.' "$catalogue" | jq -c \
           arch: $platform_arch,
           variant: $variant.key,
           latest: $jdk.latest,
+          build: $variant.value.build,
           script: "build-\($platform)-\($variant.value.build).sh",
+          template: "packer/\($platform)-\($variant.value.build).pkr.hcl",
           # every key of the JDK becomes an option; the Azure scripts take no --latest
           options: (
             [ $jdk | to_entries[]
@@ -55,12 +57,16 @@ images=$(yq -o=json '.' "$catalogue" | jq -c \
     ))
   ')
 
-# a missing script is a catalogue error: stop before any build
-missing=$(jq -r '.[].script' <<<"$images" | sort -u | while read -r script; do
-  [ -x "$repo_dir/$script" ] || echo "$script"
+# a missing script or template is a catalogue error: stop before any build
+missing=$(jq -r '.[] | .script, .template' <<<"$images" | sort -u | while read -r file; do
+  if [[ "$file" == *.sh ]]; then
+    [ -x "$repo_dir/$file" ] || echo "$file"
+  else
+    [ -f "$repo_dir/$file" ] || echo "$file"
+  fi
 done)
 if [ -n "$missing" ]; then
-  echo "Build scripts not found: $missing" >&2
+  echo "Build scripts or Packer templates not found: $missing" >&2
   exit 1
 fi
 

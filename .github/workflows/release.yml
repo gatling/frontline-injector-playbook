@@ -56,6 +56,8 @@ jobs:
       aws: ${{ steps.plan.outputs.aws }}
       gcp: ${{ steps.plan.outputs.gcp }}
       azure: ${{ steps.plan.outputs.azure }}
+      packer: ${{ steps.plan.outputs.packer }}
+      aws_max_parallel: ${{ steps.plan.outputs.aws_max_parallel }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -75,6 +77,10 @@ jobs:
           for cloud in aws gcp azure; do
             echo "$cloud=$(jq -c --arg cloud "$cloud" 'map(select(.cloud == $cloud))' <<<"$images")" >> "$GITHUB_OUTPUT"
           done
+          {
+            echo "packer=$(yq '.tools.packer' images.yml)"
+            echo "aws_max_parallel=$(yq '.clouds.aws.max_parallel' images.yml)"
+          } >> "$GITHUB_OUTPUT"
 
           {
             echo "### Selected images ($(jq 'length' <<<"$images"))"
@@ -86,3 +92,64 @@ jobs:
             echo "| --- | --- | --- |"
             jq -r '.[] | "| \(.name) | `\(.script)` | `\(.options)` |"' <<<"$images"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  aws:
+    name: AWS ${{ matrix.image.name }}
+    needs: plan
+    if: ${{ !inputs.dry_run && needs.plan.outputs.aws != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    # current role (AWS_ROLE_SELLER), which only trusts main: no GitHub environment until the
+    # trust policy accepts environment:release (OPS-714)
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      max-parallel: ${{ fromJSON(needs.plan.outputs.aws_max_parallel) }}
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.plan.outputs.aws) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # the Zulu templates provision with Ansible
+      - name: Install `python`
+        if: matrix.image.build == 'zulu'
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.x'
+
+      - name: Install `ansible bundle`
+        if: matrix.image.build == 'zulu'
+        run: pip install ansible jmespath
+
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@c94c2f706903706acc7fe6df7960714c2321b6fc # main
+        with:
+          version: ${{ needs.plan.outputs.packer }}
+
+      - name: Install `packer plugins` (versions of the template)
+        env:
+          TEMPLATE: ${{ matrix.image.template }}
+        run: packer init "$TEMPLATE"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_SELLER }}
+          aws-region: eu-west-3
+
+      - name: Build ${{ matrix.image.name }}
+        env:
+          SCRIPT: ${{ matrix.image.script }}
+          OPTIONS: ${{ matrix.image.options }}
+          BUILD: ${{ matrix.image.build }}
+        run: |
+          read -ra options <<<"$OPTIONS"
+          # same fixed options as the per-image workflows: --profile only for the GraalVM builds
+          options+=(--copy-regions true)
+          if [ "$BUILD" != "zulu" ]; then
+            options+=(--profile default)
+          fi
+          ./"$SCRIPT" "${options[@]}"

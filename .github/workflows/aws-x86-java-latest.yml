@@ -31,11 +31,8 @@ jobs:
         with:
           version: "latest"
 
-      - name: Install `packer plugins - Amazon`
-        run: packer plugins install github.com/hashicorp/amazon
-
-      - name: Install `packer plugins - Ansible`
-        run: packer plugins install github.com/hashicorp/ansible
+      - name: Install `packer plugins` (versions of the template)
+        run: packer init packer/aws-x86-zulu.pkr.hcl
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
