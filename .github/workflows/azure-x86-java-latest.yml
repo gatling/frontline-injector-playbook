@@ -27,11 +27,8 @@ jobs:
         with:
           version: "latest"
 
-      - name: Install `packer plugins - Amazon`
-        run: packer plugins install github.com/hashicorp/azure
-
-      - name: Install `packer plugins - Ansible`
-        run: packer plugins install github.com/hashicorp/ansible
+      - name: Install `packer plugins` (versions of the template)
+        run: packer init packer/azure-x86-zulu.pkr.hcl
 
       - name: Build image from template
         env:
