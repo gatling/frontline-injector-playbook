@@ -1,0 +1,32 @@
+# Catalogue of the load generator images, read by .github/workflows/release.yml.
+#
+# The images are the product platforms × variants (4 × 4 = 16 images). The workflow runs
+# build-<platform>-<build>.sh for each selected image, with the options of its JDK: each key
+# of a JDK becomes the option of the same name (graalvm_version → --graalvm-version).
+#
+# This is the only place where the Java and GraalVM versions are written.
+
+tools:
+  packer: 1.16.1                 # same Packer version for every build
+
+clouds:                          # parallel builds per cloud
+  aws:
+    max_parallel: 2
+  gcp:
+    max_parallel: 2
+  azure:
+    max_parallel: 2
+
+platforms: [aws-x86, aws-arm, gcp-x86, azure-x86]
+
+jdks:
+  # Zulu: major only, the latest patch is resolved at build time from the Azul API
+  zulu-latest: { java_major: 27, latest: true }
+  zulu-lts:    { java_major: 25, latest: false }
+  graalvm:     { java_major: 25, latest: true, java_version: 25.0.5.0.3, graalvm_version: 25.5.5.0.3, graalvm_jdk_version: 25i5 }
+
+variants:
+  java-latest:          { build: zulu,          jdk: zulu-latest }
+  java-lts:             { build: zulu,          jdk: zulu-lts }
+  graal-latest:         { build: graal,         jdk: graalvm }
+  graal-browser-latest: { build: graal-browser, jdk: graalvm }   # GraalVM + Node.js and Chrome Headless Shell
