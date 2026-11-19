@@ -1,0 +1,88 @@
+name: Release
+run-name: >-
+  Release (cloud: ${{ inputs.cloud }}, arch: ${{ inputs.arch }}, variant: ${{ inputs.variante }},
+  latest: ${{ inputs.latest }}${{ inputs.dry_run && ', dry run' || '' }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      cloud:
+        description: Cloud
+        type: choice
+        options: [all, aws, gcp, azure]
+        default: all
+      arch:
+        description: Architecture
+        type: choice
+        options: [all, x86, arm]
+        default: all
+      variante:
+        description: Variant (see images.yml)
+        type: choice
+        options: [all, java-latest, java-lts, graal-latest, graal-browser-latest]
+        default: all
+      latest:
+        description: "Latest: only the variants whose JDK is latest (true) or not (false)"
+        type: choice
+        options: [all, "true", "false"]
+        default: all
+      dry_run:
+        description: Dry run (list the selected images, build nothing)
+        type: boolean
+        default: false
+      image_version:
+        description: Azure image version (x.y.z), computed when empty
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+# one run at a time: a second run waits for the first one
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    name: Select the images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      aws: ${{ steps.plan.outputs.aws }}
+      gcp: ${{ steps.plan.outputs.gcp }}
+      azure: ${{ steps.plan.outputs.azure }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Select the images from images.yml
+        id: plan
+        env:
+          CLOUD: ${{ inputs.cloud }}
+          ARCH: ${{ inputs.arch }}
+          VARIANT: ${{ inputs.variante }}
+          LATEST: ${{ inputs.latest }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          images=$(lib/release-plan.sh images.yml "$CLOUD" "$ARCH" "$VARIANT" "$LATEST")
+
+          # one matrix per cloud
+          for cloud in aws gcp azure; do
+            echo "$cloud=$(jq -c --arg cloud "$cloud" 'map(select(.cloud == $cloud))' <<<"$images")" >> "$GITHUB_OUTPUT"
+          done
+
+          {
+            echo "### Selected images ($(jq 'length' <<<"$images"))"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "Dry run: nothing is built."
+            fi
+            echo
+            echo "| Image | Script | Options |"
+            echo "| --- | --- | --- |"
+            jq -r '.[] | "| \(.name) | `\(.script)` | `\(.options)` |"' <<<"$images"
+          } >> "$GITHUB_STEP_SUMMARY"
