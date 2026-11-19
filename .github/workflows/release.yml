@@ -222,36 +222,47 @@ jobs:
           IMAGES: ${{ needs.plan.outputs.aws }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ACTOR: ${{ github.triggering_actor }}
-          FILTERS: "cloud: ${{ inputs.cloud }}, arch: ${{ inputs.arch }}, variant: ${{ inputs.variante }}, latest: ${{ inputs.latest }}"
+          FILTERS: "cloud ${{ inputs.cloud }} · arch ${{ inputs.arch }} · variant ${{ inputs.variante }} · latest ${{ inputs.latest }}"
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "::warning::SLACK_WEBHOOK_URL is not set: no Slack notification"
             exit 0
           fi
 
-          # one line per selected image; an image without result did not run (cancelled)
+          # Block Kit message, like the other notifications of #ops-automation: a bold title,
+          # fields, one section per image and a context line; text is the fallback of the
+          # push notifications. An image without result did not run (cancelled).
           mkdir -p results
           results=$(find results -name result.json -exec cat {} + | jq -s '.')
-          text=$(jq -r -n --argjson images "$IMAGES" --argjson results "$results" \
+          payload=$(jq -n --argjson images "$IMAGES" --argjson results "$results" \
             --arg run "$RUN_URL" --arg actor "$ACTOR" --arg filters "$FILTERS" '
             [ $images[] | .name as $name
               | ($results | map(select(.name == $name))[0]) // {name: $name, outcome: "not run"} ] as $lines
+            | ($lines | length) as $total
             | ($lines | map(select(.outcome == "success")) | length) as $ok
-            | (if $ok == ($lines | length) then ":white_check_mark:" else ":x:" end)
-              + " Release: \($ok)/\($lines | length) AWS images published (\($filters))\n"
-              + ($lines | map(
-                  "• \(.name): "
-                  + (if .outcome == "success"
-                     then "`\(.ami)`"
-                       + (if .graalvm then " · GraalVM \(.graalvm)"
-                          elif .jdk then " · JDK \(.jdk) (Zulu \(.java | sub("\\+.*"; "")))"
-                          elif .java then " · Zulu \(.java | sub("\\+.*"; ""))"
-                          else "" end)
-                       + " · \(.duration / 60 | floor) min"
-                     else .outcome end)
-                ) | join("\n"))
-              + "\n<\($run)|Run> · launched by \($actor)"
-          ')
-          echo "$text"
-          curl -fsS -X POST -H 'Content-Type: application/json' \
-            --data "$(jq -n --arg text "$text" '{text: $text}')" "$SLACK_WEBHOOK_URL"
+            | (if $ok == $total
+               then ":white_check_mark: *Load generator images published on AWS: \($ok)/\($total)*"
+               else ":x: *Load generator images on AWS: \($ok)/\($total) published*" end) as $title
+            | def version:
+                if .graalvm then "GraalVM \(.graalvm)"
+                elif .jdk then "JDK \(.jdk) (Zulu \(.java | sub("\\+.*"; "")))"
+                elif .java then "Zulu \(.java | sub("\\+.*"; ""))"
+                else empty end;
+              def line:
+                if .outcome == "success"
+                then "*\(.name)*\n" + ([ "`\(.ami)`", version, "\(.duration / 60 | floor) min" ] | join(" · "))
+                else ":x: *\(.name)*\n\(.outcome)" end;
+            {
+              text: "\($title | gsub("\\*"; "")) · <\($run)|Open run>",
+              blocks: (
+                [ { type: "section", text: { type: "mrkdwn", text: $title } },
+                  { type: "section", fields: [
+                      { type: "mrkdwn", text: "*Filters*\n\($filters)" },
+                      { type: "mrkdwn", text: "*Launched by*\n\($actor)" } ] } ]
+                + ($lines | map({ type: "section", text: { type: "mrkdwn", text: line } }))
+                + [ { type: "context", elements: [
+                      { type: "mrkdwn", text: "<\($run)|Open run> · Release · frontline-injector-playbook" } ] } ]
+              )
+            }')
+          jq . <<<"$payload"
+          curl -fsS -X POST -H 'Content-Type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
