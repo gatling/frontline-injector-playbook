@@ -59,6 +59,8 @@ jobs:
       packer: ${{ steps.plan.outputs.packer }}
       aws_max_parallel: ${{ steps.plan.outputs.aws_max_parallel }}
       gcp_max_parallel: ${{ steps.plan.outputs.gcp_max_parallel }}
+      azure_max_parallel: ${{ steps.plan.outputs.azure_max_parallel }}
+      azure_version: ${{ steps.plan.outputs.azure_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -71,6 +73,7 @@ jobs:
           VARIANT: ${{ inputs.variante }}
           LATEST: ${{ inputs.latest }}
           DRY_RUN: ${{ inputs.dry_run }}
+          IMAGE_VERSION: ${{ inputs.image_version }}
         run: |
           images=$(lib/release-plan.sh images.yml "$CLOUD" "$ARCH" "$VARIANT" "$LATEST")
 
@@ -82,12 +85,32 @@ jobs:
             echo "packer=$(yq '.tools.packer' images.yml)"
             echo "aws_max_parallel=$(yq '.clouds.aws.max_parallel' images.yml)"
             echo "gcp_max_parallel=$(yq '.clouds.gcp.max_parallel' images.yml)"
+            echo "azure_max_parallel=$(yq '.clouds.azure.max_parallel' images.yml)"
           } >> "$GITHUB_OUTPUT"
+
+          # Azure image version, the same for every Azure image of the run (a re-run keeps it):
+          # the input, or year.MMDD.HHMM in UTC without leading zero (2026.1118.1344, 2027.101.905),
+          # in the order of the date since Azure compares the 3 numbers as integers
+          if [ -n "$IMAGE_VERSION" ]; then
+            if ! [[ "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::image_version must be x.y.z (integers): $IMAGE_VERSION"
+              exit 1
+            fi
+            azure_version="$IMAGE_VERSION"
+          else
+            now=$(date -u +%Y-%m%d-%H%M)
+            IFS=- read -r year monthday hourminute <<<"$now"
+            azure_version="$year.$((10#$monthday)).$((10#$hourminute))"
+          fi
+          echo "azure_version=$azure_version" >> "$GITHUB_OUTPUT"
 
           {
             echo "### Selected images ($(jq 'length' <<<"$images"))"
             if [ "$DRY_RUN" = "true" ]; then
               echo "Dry run: nothing is built."
+            fi
+            if jq -e 'any(.cloud == "azure")' <<<"$images" >/dev/null; then
+              echo "Azure image version: \`$azure_version\`"
             fi
             echo
             echo "| Image | Script | Options |"
@@ -300,11 +323,105 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/gcp-key.json"
 
+  azure:
+    name: Azure ${{ matrix.image.name }}
+    needs: plan
+    if: ${{ !inputs.dry_run && needs.plan.outputs.azure != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    # current login: the service principal secret AZURE_CLIENT_SECRET; the federated identity
+    # comes at the end of the project (OPS-723)
+    strategy:
+      max-parallel: ${{ fromJSON(needs.plan.outputs.azure_max_parallel) }}
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.plan.outputs.azure) }}
+    steps:
+      - name: Record the start time
+        run: echo "START=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # the Zulu templates provision with Ansible
+      - name: Install `python`
+        if: matrix.image.build == 'zulu'
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.x'
+
+      - name: Install `ansible bundle`
+        if: matrix.image.build == 'zulu'
+        run: pip install ansible jmespath
+
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@c94c2f706903706acc7fe6df7960714c2321b6fc # main
+        with:
+          version: ${{ needs.plan.outputs.packer }}
+
+      - name: Install `packer plugins` (versions of the template)
+        env:
+          TEMPLATE: ${{ matrix.image.template }}
+        run: packer init "$TEMPLATE"
+
+      - name: Build ${{ matrix.image.name }}
+        id: build
+        env:
+          SCRIPT: ${{ matrix.image.script }}
+          OPTIONS: ${{ matrix.image.options }}
+          IMAGE_VERSION: ${{ needs.plan.outputs.azure_version }}
+          CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+        run: |
+          read -ra options <<<"$OPTIONS"
+          # same fixed options as the per-image workflows, with the version of the run
+          options+=(--client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET"
+            --subscription-id "$SUBSCRIPTION_ID" --tenant-id "$TENANT_ID" --image-version "$IMAGE_VERSION")
+          ./"$SCRIPT" "${options[@]}" | tee build.log
+
+          # Packer gives the gallery image version at the end:
+          # "ManagedImageSharedImageGalleryId: .../images/<definition>/versions/<version>"
+          image=$(grep -oE 'ManagedImageSharedImageGalleryId: \S+/images/[^/]+/versions/[0-9.]+' build.log \
+            | tail -n 1 | sed -E 's|.*/images/([^/]+)/versions/(.*)|\1 \2|' || true)
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      # result of this image for the Slack notification, also when the build fails; gallery
+      # versions have no tags: the Zulu version is in the build log ("OpenJDK version: 25.38.201+0",
+      # Zulu builds only), the GraalVM version in the options
+      - name: Describe the result
+        if: always()
+        env:
+          NAME: ${{ matrix.image.name }}
+          OUTCOME: ${{ steps.build.outcome }}
+          IMAGE: ${{ steps.build.outputs.image }}
+          BUILD: ${{ matrix.image.build }}
+          OPTIONS: ${{ matrix.image.options }}
+        run: |
+          if [ -n "$IMAGE" ]; then
+            if [ "$BUILD" = "zulu" ]; then
+              ZULU=$(grep -oE 'OpenJDK version: [0-9.+]+' build.log | tail -n 1 | cut -d ' ' -f 3 || true)
+              export ZULU
+            fi
+            GRAALVM=$(grep -oE -- '--graalvm-version [0-9.]+' <<<"$OPTIONS" | cut -d ' ' -f 2 || true)
+            export GRAALVM
+          fi
+          lib/release-result.sh
+
+      - name: Upload the result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: result-${{ matrix.image.platform }}-${{ matrix.image.variant }}
+          path: result.json
+          retention-days: 7
+
   notify:
     name: Notify Slack
-    needs: [plan, aws, gcp]
+    needs: [plan, aws, gcp, azure]
     # also when a build fails, but not in dry run
-    if: ${{ always() && !inputs.dry_run && needs.plan.result == 'success' && (needs.plan.outputs.aws != '[]' || needs.plan.outputs.gcp != '[]') }}
+    if: ${{ always() && !inputs.dry_run && needs.plan.result == 'success' && (needs.plan.outputs.aws != '[]' || needs.plan.outputs.gcp != '[]' || needs.plan.outputs.azure != '[]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -321,6 +438,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           IMAGES_AWS: ${{ needs.plan.outputs.aws }}
           IMAGES_GCP: ${{ needs.plan.outputs.gcp }}
+          IMAGES_AZURE: ${{ needs.plan.outputs.azure }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ACTOR: ${{ github.triggering_actor }}
           FILTERS: "cloud ${{ inputs.cloud }} · arch ${{ inputs.arch }} · variant ${{ inputs.variante }} · latest ${{ inputs.latest }}"
@@ -335,14 +453,15 @@ jobs:
           # push notifications. An image without result did not run (cancelled).
           mkdir -p results
           results=$(find results -name result.json -exec cat {} + | jq -s '.')
-          payload=$(jq -n --argjson aws "$IMAGES_AWS" --argjson gcp "$IMAGES_GCP" --argjson results "$results" \
-            --arg run "$RUN_URL" --arg actor "$ACTOR" --arg filters "$FILTERS" '
-            [ ($aws + $gcp)[] | . as $image
+          payload=$(jq -n --argjson aws "$IMAGES_AWS" --argjson gcp "$IMAGES_GCP" --argjson azure "$IMAGES_AZURE" \
+            --argjson results "$results" --arg run "$RUN_URL" --arg actor "$ACTOR" --arg filters "$FILTERS" '
+            [ ($aws + $gcp + $azure)[] | . as $image
               | (($results | map(select(.name == $image.name))[0]) // {name: $image.name, outcome: "not run"})
               + {cloud: $image.cloud} ] as $lines
             | ($lines | length) as $total
             | ($lines | map(select(.outcome == "success")) | length) as $ok
-            | ($lines | map(.cloud) | unique | map({aws: "AWS", gcp: "GCP", azure: "Azure"}[.]) | join(" and ")) as $clouds
+            | ($lines | map(.cloud) | unique | map({aws: "AWS", gcp: "GCP", azure: "Azure"}[.])
+               | if length > 1 then (.[:-1] | join(", ")) + " and " + .[-1] else .[0] end) as $clouds
             | (if $ok == $total
                then ":white_check_mark: *Load generator images published on \($clouds): \($ok)/\($total)*"
                else ":x: *Load generator images on \($clouds): \($ok)/\($total) published*" end) as $title
