@@ -27,7 +27,7 @@ on:
         options: [all, "true", "false"]
         default: all
       dry_run:
-        description: Dry run (list the selected images, build nothing)
+        description: Dry run (list the selected images, build nothing; does not wait for the builds)
         type: boolean
         default: false
       image_version:
@@ -38,9 +38,12 @@ on:
 permissions:
   contents: read
 
-# one run at a time: a second run waits for the first one
+# One build run at a time: a second build run waits for the first one. GitHub keeps only one
+# pending run per group: a third run cancels the pending one, so launch at most one build while
+# another one runs. A dry run only lists the images: it has its own group, so that it never
+# waits for a build nor cancels a pending one.
 concurrency:
-  group: release
+  group: release-${{ inputs.dry_run && 'dry-run' || 'build' }}
   cancel-in-progress: false
 
 defaults:
