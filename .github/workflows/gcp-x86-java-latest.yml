@@ -27,15 +27,12 @@ jobs:
         with:
           version: "latest"
 
-      - name: Install `packer plugins - GCP`
-        run: packer plugins install github.com/hashicorp/googlecompute
-
-      - name: Install `packer plugins - Ansible`
-        run: packer plugins install github.com/hashicorp/ansible
+      - name: Install `packer plugins` (versions of the template)
+        run: packer init packer/gcp-x86-zulu.pkr.hcl
 
       - name: Configure GCP Credentials
         run: |
-          echo $ENV_FILE > creds.json;
+          echo "$ENV_FILE" > creds.json;
         shell: bash
         env: 
           ENV_FILE: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} 
