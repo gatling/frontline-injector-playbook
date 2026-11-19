@@ -58,6 +58,7 @@ jobs:
       azure: ${{ steps.plan.outputs.azure }}
       packer: ${{ steps.plan.outputs.packer }}
       aws_max_parallel: ${{ steps.plan.outputs.aws_max_parallel }}
+      gcp_max_parallel: ${{ steps.plan.outputs.gcp_max_parallel }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -80,6 +81,7 @@ jobs:
           {
             echo "packer=$(yq '.tools.packer' images.yml)"
             echo "aws_max_parallel=$(yq '.clouds.aws.max_parallel' images.yml)"
+            echo "gcp_max_parallel=$(yq '.clouds.gcp.max_parallel' images.yml)"
           } >> "$GITHUB_OUTPUT"
 
           {
@@ -162,35 +164,27 @@ jobs:
           ami=$(grep -oE 'eu-west-3: ami-[0-9a-f]+' build.log | tail -n 1 | cut -d ' ' -f 2 || true)
           echo "ami=$ami" >> "$GITHUB_OUTPUT"
 
-      # result of this image for the Slack notification, also when the build fails
+      # result of this image for the Slack notification, also when the build fails; versions
+      # from the AMI tags (JavaVersion is the Zulu version for a Zulu image)
       - name: Describe the result
         if: always()
         env:
           NAME: ${{ matrix.image.name }}
           OUTCOME: ${{ steps.build.outcome }}
-          AMI: ${{ steps.build.outputs.ami }}
+          IMAGE: ${{ steps.build.outputs.ami }}
         run: |
-          result=$(jq -n --arg name "$NAME" --arg outcome "$OUTCOME" --arg ami "$AMI" \
-            --argjson duration "$(( $(date +%s) - START ))" \
-            '{name: $name, outcome: $outcome, ami: $ami, duration: $duration}')
-          if [ -n "$AMI" ]; then
-            tags=$(aws ec2 describe-images --region eu-west-3 --image-ids "$AMI" \
+          if [ -n "$IMAGE" ]; then
+            tags=$(aws ec2 describe-images --region eu-west-3 --image-ids "$IMAGE" \
               --query 'Images[0].Tags' --output json || echo '[]')
-            result=$(jq --argjson tags "${tags:-[]}" \
-              '. + {java: ($tags | map(select(.Key == "JavaVersion"))[0].Value),
-                    vendor: ($tags | map(select(.Key == "JavaVendor"))[0].Value),
-                    graalvm: ($tags | map(select(.Key == "GraalVMVersion"))[0].Value)}' <<<"$result")
+            tag() { jq -r --arg key "$1" 'map(select(.Key == $key))[0].Value // empty' <<<"${tags:-[]}"; }
+            if [ "$(tag JavaVendor)" = "zulu" ]; then
+              ZULU=$(tag JavaVersion)
+              export ZULU
+            fi
+            GRAALVM=$(tag GraalVMVersion)
+            export GRAALVM
           fi
-
-          # Zulu: JavaVersion is the Zulu version (25.38.201+0); the JDK version (25.0.5.1)
-          # comes from the Azul API, the line keeps the Zulu version only if it does not answer
-          zulu=$(jq -r 'select(.vendor == "zulu") | .java // empty' <<<"$result")
-          if [ -n "$zulu" ]; then
-            jdk=$(curl -fsS --max-time 20 "https://api.azul.com/metadata/v1/zulu/packages/?distro_version=${zulu%%+*}&os=linux-glibc&archive_type=tar.gz&java_package_type=jre&release_status=ga" \
-              | jq -r '[.[].java_version | map(tostring) | join(".")] | unique | first // empty' || true)
-            result=$(jq --arg jdk "$jdk" '. + {jdk: (if $jdk == "" then null else $jdk end)}' <<<"$result")
-          fi
-          echo "$result" | tee result.json
+          lib/release-result.sh
 
       - name: Upload the result
         if: always()
@@ -200,11 +194,117 @@ jobs:
           path: result.json
           retention-days: 7
 
+  gcp:
+    name: GCP ${{ matrix.image.name }}
+    needs: plan
+    if: ${{ !inputs.dry_run && needs.plan.outputs.gcp != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    # current login: the service account key of GOOGLE_APPLICATION_CREDENTIALS; Workload
+    # Identity Federation comes at the end of the project (OPS-723)
+    strategy:
+      max-parallel: ${{ fromJSON(needs.plan.outputs.gcp_max_parallel) }}
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.plan.outputs.gcp) }}
+    steps:
+      - name: Record the start time
+        run: echo "START=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # the Zulu templates provision with Ansible
+      - name: Install `python`
+        if: matrix.image.build == 'zulu'
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.x'
+
+      - name: Install `ansible bundle`
+        if: matrix.image.build == 'zulu'
+        run: pip install ansible jmespath
+
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@c94c2f706903706acc7fe6df7960714c2321b6fc # main
+        with:
+          version: ${{ needs.plan.outputs.packer }}
+
+      - name: Install `packer plugins` (versions of the template)
+        env:
+          TEMPLATE: ${{ matrix.image.template }}
+        run: packer init "$TEMPLATE"
+
+      # key file outside the checkout, removed at the end of the job; read by Packer and by
+      # the gcloud of the build script through GOOGLE_APPLICATION_CREDENTIALS
+      - name: Configure GCP Credentials
+        env:
+          KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          key_file="$RUNNER_TEMP/gcp-key.json"
+          (umask 077 && printf '%s' "$KEY" > "$key_file")
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$key_file" >> "$GITHUB_ENV"
+
+      - name: Build ${{ matrix.image.name }}
+        id: build
+        env:
+          SCRIPT: ${{ matrix.image.script }}
+          OPTIONS: ${{ matrix.image.options }}
+          GOOGLE_PROJECT_ID: ${{ vars.GOOGLE_PROJECT_ID }}
+        run: |
+          read -ra options <<<"$OPTIONS"
+          # same fixed option as the per-image workflows
+          options+=(--project-id "$GOOGLE_PROJECT_ID")
+          ./"$SCRIPT" "${options[@]}" | tee build.log
+
+          # Packer names the image at the end: "A disk image was created in the '<project>' project: <name>"
+          image=$(grep -oE "A disk image was created in the '[^']+' project: [a-z0-9-]+" build.log \
+            | tail -n 1 | awk '{print $NF}' || true)
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      # result of this image for the Slack notification, also when the build fails; GCP images
+      # have no labels: the version is in the description ("... OpenJDK 25.38.201-0 (022c)",
+      # "... GraalVM 25.5.5.0.3 (f051)"), and the image must be shared with allAuthenticatedUsers
+      - name: Describe the result
+        if: always()
+        env:
+          NAME: ${{ matrix.image.name }}
+          OUTCOME: ${{ steps.build.outcome }}
+          IMAGE: ${{ steps.build.outputs.image }}
+          GOOGLE_PROJECT_ID: ${{ vars.GOOGLE_PROJECT_ID }}
+        run: |
+          if [ -n "$IMAGE" ]; then
+            description=$(gcloud compute images describe "$IMAGE" --project "$GOOGLE_PROJECT_ID" \
+              --format='value(description)' || true)
+            ZULU=$(grep -oE 'OpenJDK [0-9.]+' <<<"$description" | cut -d ' ' -f 2 || true)
+            GRAALVM=$(grep -oE 'GraalVM [0-9.]+' <<<"$description" | cut -d ' ' -f 2 || true)
+            export ZULU GRAALVM
+            shared=$(gcloud compute images get-iam-policy "$IMAGE" --project "$GOOGLE_PROJECT_ID" --format=json \
+              | jq '[.bindings[]? | select(.role == "roles/compute.imageUser") | .members[]] | index("allAuthenticatedUsers") != null' || echo false)
+            if [ "$shared" != "true" ]; then
+              echo "::error::$IMAGE is not shared with allAuthenticatedUsers"
+              export OUTCOME="not shared"
+            fi
+          fi
+          lib/release-result.sh
+
+      - name: Upload the result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: result-${{ matrix.image.platform }}-${{ matrix.image.variant }}
+          path: result.json
+          retention-days: 7
+
+      - name: Remove the key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/gcp-key.json"
+
   notify:
     name: Notify Slack
-    needs: [plan, aws]
+    needs: [plan, aws, gcp]
     # also when a build fails, but not in dry run
-    if: ${{ always() && !inputs.dry_run && needs.plan.result == 'success' && needs.plan.outputs.aws != '[]' }}
+    if: ${{ always() && !inputs.dry_run && needs.plan.result == 'success' && (needs.plan.outputs.aws != '[]' || needs.plan.outputs.gcp != '[]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -219,7 +319,8 @@ jobs:
       - name: Post the summary to Slack
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          IMAGES: ${{ needs.plan.outputs.aws }}
+          IMAGES_AWS: ${{ needs.plan.outputs.aws }}
+          IMAGES_GCP: ${{ needs.plan.outputs.gcp }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ACTOR: ${{ github.triggering_actor }}
           FILTERS: "cloud ${{ inputs.cloud }} · arch ${{ inputs.arch }} · variant ${{ inputs.variante }} · latest ${{ inputs.latest }}"
@@ -234,23 +335,25 @@ jobs:
           # push notifications. An image without result did not run (cancelled).
           mkdir -p results
           results=$(find results -name result.json -exec cat {} + | jq -s '.')
-          payload=$(jq -n --argjson images "$IMAGES" --argjson results "$results" \
+          payload=$(jq -n --argjson aws "$IMAGES_AWS" --argjson gcp "$IMAGES_GCP" --argjson results "$results" \
             --arg run "$RUN_URL" --arg actor "$ACTOR" --arg filters "$FILTERS" '
-            [ $images[] | .name as $name
-              | ($results | map(select(.name == $name))[0]) // {name: $name, outcome: "not run"} ] as $lines
+            [ ($aws + $gcp)[] | . as $image
+              | (($results | map(select(.name == $image.name))[0]) // {name: $image.name, outcome: "not run"})
+              + {cloud: $image.cloud} ] as $lines
             | ($lines | length) as $total
             | ($lines | map(select(.outcome == "success")) | length) as $ok
+            | ($lines | map(.cloud) | unique | map({aws: "AWS", gcp: "GCP", azure: "Azure"}[.]) | join(" and ")) as $clouds
             | (if $ok == $total
-               then ":white_check_mark: *Load generator images published on AWS: \($ok)/\($total)*"
-               else ":x: *Load generator images on AWS: \($ok)/\($total) published*" end) as $title
+               then ":white_check_mark: *Load generator images published on \($clouds): \($ok)/\($total)*"
+               else ":x: *Load generator images on \($clouds): \($ok)/\($total) published*" end) as $title
             | def version:
                 if .graalvm then "GraalVM \(.graalvm)"
-                elif .jdk then "JDK \(.jdk) (Zulu \(.java | sub("\\+.*"; "")))"
-                elif .java then "Zulu \(.java | sub("\\+.*"; ""))"
+                elif .jdk then "JDK \(.jdk) (Zulu \(.zulu))"
+                elif .zulu then "Zulu \(.zulu)"
                 else empty end;
               def line:
                 if .outcome == "success"
-                then "*\(.name)*\n" + ([ "`\(.ami)`", version, "\(.duration / 60 | floor) min" ] | join(" · "))
+                then "*\(.name)*\n" + ([ "`\(.image)`", version, "\(.duration / 60 | floor) min" ] | join(" · "))
                 else ":x: *\(.name)*\n\(.outcome)" end;
             {
               text: "\($title | gsub("\\*"; "")) · <\($run)|Open run>",
