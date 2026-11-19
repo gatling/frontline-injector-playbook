@@ -110,6 +110,9 @@ jobs:
       matrix:
         image: ${{ fromJSON(needs.plan.outputs.aws) }}
     steps:
+      - name: Record the start time
+        run: echo "START=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -141,6 +144,7 @@ jobs:
           aws-region: eu-west-3
 
       - name: Build ${{ matrix.image.name }}
+        id: build
         env:
           SCRIPT: ${{ matrix.image.script }}
           OPTIONS: ${{ matrix.image.options }}
@@ -152,4 +156,89 @@ jobs:
           if [ "$BUILD" != "zulu" ]; then
             options+=(--profile default)
           fi
-          ./"$SCRIPT" "${options[@]}"
+          ./"$SCRIPT" "${options[@]}" | tee build.log
+
+          # Packer lists the AMI of each region at the end: "eu-west-3: ami-..."
+          ami=$(grep -oE 'eu-west-3: ami-[0-9a-f]+' build.log | tail -n 1 | cut -d ' ' -f 2 || true)
+          echo "ami=$ami" >> "$GITHUB_OUTPUT"
+
+      # result of this image for the Slack notification, also when the build fails
+      - name: Describe the result
+        if: always()
+        env:
+          NAME: ${{ matrix.image.name }}
+          OUTCOME: ${{ steps.build.outcome }}
+          AMI: ${{ steps.build.outputs.ami }}
+        run: |
+          result=$(jq -n --arg name "$NAME" --arg outcome "$OUTCOME" --arg ami "$AMI" \
+            --argjson duration "$(( $(date +%s) - START ))" \
+            '{name: $name, outcome: $outcome, ami: $ami, duration: $duration}')
+          if [ -n "$AMI" ]; then
+            tags=$(aws ec2 describe-images --region eu-west-3 --image-ids "$AMI" \
+              --query 'Images[0].Tags' --output json || echo '[]')
+            result=$(jq --argjson tags "${tags:-[]}" \
+              '. + {java: ($tags | map(select(.Key == "JavaVersion"))[0].Value),
+                    graalvm: ($tags | map(select(.Key == "GraalVMVersion"))[0].Value)}' <<<"$result")
+          fi
+          echo "$result" | tee result.json
+
+      - name: Upload the result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: result-${{ matrix.image.platform }}-${{ matrix.image.variant }}
+          path: result.json
+          retention-days: 7
+
+  notify:
+    name: Notify Slack
+    needs: [plan, aws]
+    # also when a build fails, but not in dry run
+    if: ${{ always() && !inputs.dry_run && needs.plan.result == 'success' && needs.plan.outputs.aws != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # no result at all when every build was cancelled: the message says so
+      - name: Download the results
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: result-*
+          path: results
+
+      - name: Post the summary to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          IMAGES: ${{ needs.plan.outputs.aws }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ACTOR: ${{ github.triggering_actor }}
+          FILTERS: "cloud: ${{ inputs.cloud }}, arch: ${{ inputs.arch }}, variant: ${{ inputs.variante }}, latest: ${{ inputs.latest }}"
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL is not set: no Slack notification"
+            exit 0
+          fi
+
+          # one line per selected image; an image without result did not run (cancelled)
+          mkdir -p results
+          results=$(find results -name result.json -exec cat {} + | jq -s '.')
+          text=$(jq -r -n --argjson images "$IMAGES" --argjson results "$results" \
+            --arg run "$RUN_URL" --arg actor "$ACTOR" --arg filters "$FILTERS" '
+            [ $images[] | .name as $name
+              | ($results | map(select(.name == $name))[0]) // {name: $name, outcome: "not run"} ] as $lines
+            | ($lines | map(select(.outcome == "success")) | length) as $ok
+            | (if $ok == ($lines | length) then ":white_check_mark:" else ":x:" end)
+              + " Release: \($ok)/\($lines | length) AWS images published (\($filters))\n"
+              + ($lines | map(
+                  "• \(.name): "
+                  + (if .outcome == "success"
+                     then "`\(.ami)`"
+                       + (if .graalvm then " · GraalVM \(.graalvm)" elif .java then " · Java \(.java)" else "" end)
+                       + " · \(.duration / 60 | floor) min"
+                     else .outcome end)
+                ) | join("\n"))
+              + "\n<\($run)|Run> · launched by \($actor)"
+          ')
+          echo "$text"
+          curl -fsS -X POST -H 'Content-Type: application/json' \
+            --data "$(jq -n --arg text "$text" '{text: $text}')" "$SLACK_WEBHOOK_URL"
