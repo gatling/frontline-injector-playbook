@@ -16,10 +16,10 @@ echo "-- installing browser runtime                                         --"
 echo "------------------------------------------------------------------------"
 
 # An LTS of the Node.js major bundled by the Playwright version below.
-NODE_VERSION="${NODE_VERSION:-24.22.2}"
+NODE_VERSION="${NODE_VERSION:-26.13.1}"
 # The playwright-core version of the Playwright driver used by gatling-browser: it pins the Chrome Headless Shell
 # revision, which the driver doesn't download as PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set.
-PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.64.0}"
+PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.65.1}"
 
 readonly NODE_HOME=/opt/node
 readonly BROWSERS_PATH=/opt/ms-playwright
@@ -32,18 +32,18 @@ esac
 
 # The libraries of Chrome Headless Shell, plus fontconfig and the Liberation fonts: at least one font is required, and
 # Liberation has the metrics of Arial, Times New Roman and Courier New, so pages lay out like on users' machines (it
-# matters for LCP and CLS).
+# matters for LCP and CLS). And libatomic, which the Linux binaries of Node.js link since Node.js 26.
 if command -v apt-get > /dev/null; then
   apt-get update
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    ca-certificates curl xz-utils \
+    ca-certificates curl xz-utils libatomic1 \
     libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 libdbus-1-3 libdrm2 libexpat1 libgbm1 \
     libglib2.0-0t64 libnspr4 libnss3 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 \
     libxrandr2 \
     fontconfig fonts-liberation
 elif command -v dnf > /dev/null; then
   dnf install -y \
-    tar xz \
+    tar xz libatomic \
     alsa-lib at-spi2-atk at-spi2-core atk dbus-libs expat glib2 libdrm libX11 libxcb libXcomposite libXdamage libXext \
     libXfixes libxkbcommon libXrandr mesa-libgbm nspr nss \
     fontconfig liberation-mono-fonts liberation-sans-fonts liberation-serif-fonts
