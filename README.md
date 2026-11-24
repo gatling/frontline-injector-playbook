@@ -31,14 +31,17 @@ images have their own builds, separate from the GraalVM ones (`build-aws-{arm,x8
 `build-azure-x86-graal-browser.sh`, `packer/azure-x86-graal-browser.pkr.hcl`), so that each image can change without
 affecting the other. The images contain:
 
-- Node.js, from the official distribution, in `/opt/node`, for the Playwright driver, instead of the one bundled in
-  Playwright's `driver-bundle` jar. Keep `NODE_VERSION` on the latest patch of the Node.js major bundled by Playwright.
-- Chrome Headless Shell, in `/opt/ms-playwright`, installed by the Playwright CLI. Each Playwright version requires one
-  browser revision and downloads are disabled: `PLAYWRIGHT_VERSION` must be the `playwright-core` version of the
-  Playwright driver used by gatling-browser, and must be upgraded here before gatling-browser upgrades Playwright.
+- The Playwright driver, the `playwright-core` package, in `/opt/playwright-driver`. gatling-browser uses this driver
+  rather than one of its own, and supports a window of Playwright versions: `PLAYWRIGHT_VERSION` must be in that window,
+  so a gatling-browser release supporting a new Playwright version must come out before the images upgrade to it.
+- Node.js, from the official distribution, in `/opt/node`, to run the driver. Keep `NODE_VERSION` on the latest patch of
+  the Node.js major bundled by Playwright.
+- Chrome Headless Shell, in `/opt/ms-playwright`, installed by that driver: each Playwright version requires one browser
+  revision, so the driver, Node.js and the browser of an image always match. Downloads are disabled.
 - Their libraries, fontconfig and the Liberation fonts, from the distribution packages.
 
-The script sets `PLAYWRIGHT_NODEJS_PATH`, `PLAYWRIGHT_BROWSERS_PATH` and `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` in
+The script sets `PLAYWRIGHT_DRIVER_DIR`, `PLAYWRIGHT_NODEJS_PATH`, `PLAYWRIGHT_BROWSERS_PATH` and
+`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD` in
 `/etc/profile.d/gatling-browser.sh` and `/etc/environment`. Processes started by cloud-init read neither: the load
 generator startup script must source `/etc/profile.d/gatling-browser.sh`.
 
