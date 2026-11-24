@@ -1,7 +1,8 @@
 #!/usr/bin/bash
 #
-# Installs what gatling-browser needs: Node.js for the Playwright driver (instead of the one bundled in Playwright's
-# driver-bundle jar), Chrome Headless Shell, and their libraries and fonts.
+# Installs what gatling-browser needs: the Playwright driver, Node.js to run it, the Chrome Headless Shell revision this
+# driver pins, and their libraries and fonts. The three come from one Playwright version, so they always match:
+# gatling-browser uses this driver, not one of its own, and supports a window of Playwright versions.
 # Supports Debian (GCP, Azure) and Amazon Linux 2023 (AWS), x86_64 and aarch64.
 # Only run by the GraalVM packer builds with browser=true, for the graalvm-browser images: GraalVM runs both JVM and
 # JavaScript simulations, so one flavor covers both, and the graalvm-openjdk and Zulu images stay without a browser.
@@ -17,11 +18,12 @@ echo "------------------------------------------------------------------------"
 
 # An LTS of the Node.js major bundled by the Playwright version below.
 NODE_VERSION="${NODE_VERSION:-26.13.1}"
-# The playwright-core version of the Playwright driver used by gatling-browser: it pins the Chrome Headless Shell
-# revision, which the driver doesn't download as PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set.
+# The playwright-core version of the driver, within the window supported by gatling-browser: it pins the Chrome Headless
+# Shell revision, which the driver doesn't download as PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set.
 PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.65.1}"
 
 readonly NODE_HOME=/opt/node
+readonly DRIVER_DIR=/opt/playwright-driver
 readonly BROWSERS_PATH=/opt/ms-playwright
 
 case "$(uname -m)" in
@@ -68,17 +70,21 @@ mkdir -p "$NODE_HOME/bin"
 cp "$WORK_DIR/node/bin/node" "$NODE_HOME/bin/"
 cp "$WORK_DIR/node/LICENSE" "$NODE_HOME/"
 
-# Chrome Headless Shell, installed by the Playwright CLI so that it has the layout the Playwright driver expects.
-# FFmpeg comes along but is only for video recording, which gatling-browser doesn't use.
-# playwright-core is installed in a temporary project rather than run with npx: the CLI prints a warning about missing
-# project dependencies when it's run from the npx cache.
-rm -rf "$BROWSERS_PATH"
+# The Playwright driver: the playwright-core package, which has no dependencies, in the layout of a preinstalled driver
+# (PLAYWRIGHT_DRIVER_DIR/package/cli.js). npm checks the tarball against the registry's integrity hash.
 export npm_config_cache="$WORK_DIR/npm-cache" npm_config_update_notifier=false npm_config_audit=false npm_config_fund=false
-PATH="$WORK_DIR/node/bin:$PATH" npm install --silent --prefix "$WORK_DIR/playwright" "playwright-core@${PLAYWRIGHT_VERSION}"
-PLAYWRIGHT_BROWSERS_PATH="$BROWSERS_PATH" \
-  "$WORK_DIR/node/bin/node" "$WORK_DIR/playwright/node_modules/playwright-core/cli.js" install chromium-headless-shell
+(cd "$WORK_DIR" && PATH="$WORK_DIR/node/bin:$PATH" npm pack --silent "playwright-core@${PLAYWRIGHT_VERSION}")
+rm -rf "$DRIVER_DIR"
+mkdir -p "$DRIVER_DIR/package"
+tar -xzf "$WORK_DIR/playwright-core-${PLAYWRIGHT_VERSION}.tgz" --strip-components=1 -C "$DRIVER_DIR/package"
+chown -R root:root "$DRIVER_DIR"
+
+# Chrome Headless Shell, installed by this driver so that it's the revision the driver looks for, in the layout it
+# expects. FFmpeg comes along but is only for video recording, which gatling-browser doesn't use.
+rm -rf "$BROWSERS_PATH"
+PLAYWRIGHT_BROWSERS_PATH="$BROWSERS_PATH" "$NODE_HOME/bin/node" "$DRIVER_DIR/package/cli.js" install chromium-headless-shell
 rm -rf "$BROWSERS_PATH"/ffmpeg-* "$BROWSERS_PATH/.links"
-chmod -R a+rX "$BROWSERS_PATH" "$NODE_HOME"
+chmod -R a+rX "$BROWSERS_PATH" "$NODE_HOME" "$DRIVER_DIR"
 
 # chrome-headless-shell-linux64/chrome-headless-shell on x86_64, chrome-linux/headless_shell on aarch64
 BROWSER=""
@@ -101,17 +107,19 @@ fc-cache --force
 # For login shells, and for processes started through PAM (SSH sessions). Processes started by cloud-init, like the
 # load generator, read neither: they must set these variables themselves.
 cat > /etc/profile.d/gatling-browser.sh << EOF
+export PLAYWRIGHT_DRIVER_DIR=$DRIVER_DIR
 export PLAYWRIGHT_NODEJS_PATH=$NODE_HOME/bin/node
 export PLAYWRIGHT_BROWSERS_PATH=$BROWSERS_PATH
 export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 EOF
 chmod 644 /etc/profile.d/gatling-browser.sh
 touch /etc/environment
-sed -i '/^PLAYWRIGHT_\(NODEJS_PATH\|BROWSERS_PATH\|SKIP_BROWSER_DOWNLOAD\)=/d' /etc/environment
+sed -i '/^PLAYWRIGHT_\(DRIVER_DIR\|NODEJS_PATH\|BROWSERS_PATH\|SKIP_BROWSER_DOWNLOAD\)=/d' /etc/environment
 cat >> /etc/environment << EOF
+PLAYWRIGHT_DRIVER_DIR=$DRIVER_DIR
 PLAYWRIGHT_NODEJS_PATH=$NODE_HOME/bin/node
 PLAYWRIGHT_BROWSERS_PATH=$BROWSERS_PATH
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 EOF
 
-echo "Node.js $("$NODE_HOME/bin/node" --version) and $(basename "$(dirname "$(dirname "$BROWSER")")") installed"
+echo "Playwright driver ${PLAYWRIGHT_VERSION}, Node.js $("$NODE_HOME/bin/node" --version) and $(basename "$(dirname "$(dirname "$BROWSER")")") installed"

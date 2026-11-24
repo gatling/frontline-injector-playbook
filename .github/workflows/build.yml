@@ -33,14 +33,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Download playwright-core
-        run: |
-          npm pack --silent "playwright-core@$PLAYWRIGHT_VERSION" --pack-destination /tmp
-          mkdir playwright-core
-          tar -xzf "/tmp/playwright-core-$PLAYWRIGHT_VERSION.tgz" --strip-components=1 -C playwright-core
-
       - name: Run remote-script/05-browser-setup.sh and the browser smoke test
-        run: docker run --rm --volume "$PWD:/playbook:ro" "${{ matrix.image }}" bash /playbook/test/browser-setup.sh
+        run: docker run --rm --env PLAYWRIGHT_VERSION --volume "$PWD:/playbook:ro" "${{ matrix.image }}" bash /playbook/test/browser-setup.sh
 
   build:
     runs-on: ubuntu-latest

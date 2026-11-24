@@ -1,9 +1,17 @@
 // Smoke test of the browser runtime installed by remote-script/05-browser-setup.sh: launches Chrome Headless Shell
-// through Playwright, with the installed Node.js and browser, as the Playwright driver of gatling-browser does.
-// Usage: "$PLAYWRIGHT_NODEJS_PATH" browser-smoke.js <playwright-core package directory>
+// through the installed Playwright driver and Node.js, as gatling-browser does.
+// Usage: "$PLAYWRIGHT_NODEJS_PATH" browser-smoke.js [expected playwright-core version]
 
 const assert = require("assert");
-const { chromium } = require(process.argv[2]);
+const path = require("path");
+
+const driverPackage = path.join(process.env.PLAYWRIGHT_DRIVER_DIR, "package");
+const driverVersion = require(path.join(driverPackage, "package.json")).version;
+console.log(`Playwright driver ${driverVersion}`);
+if (process.argv[2]) {
+  assert.strictEqual(driverVersion, process.argv[2], "unexpected Playwright driver version");
+}
+const { chromium } = require(driverPackage);
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
