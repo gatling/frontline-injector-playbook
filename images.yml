@@ -23,7 +23,7 @@ jdks:
   # Zulu: major only, the latest patch is resolved at build time from the Azul API
   zulu-latest: { java_major: 27, latest: true }
   zulu-lts:    { java_major: 25, latest: false }
-  graalvm:     { java_major: 25, latest: true, java_version: 25.0.5.0.3, graalvm_version: 25.5.5.0.3, graalvm_jdk_version: 25i5 }
+  graalvm:     { java_major: 25, latest: true, java_version: 25.0.5.1, graalvm_version: 25.6.5.1, graalvm_jdk_version: 25i6 }
 
 variants:
   java-latest:          { build: zulu,          jdk: zulu-latest }
