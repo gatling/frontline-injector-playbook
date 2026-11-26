@@ -156,7 +156,7 @@ jobs:
         run: pip install ansible jmespath
 
       - name: Setup `packer`
-        uses: hashicorp/setup-packer@c94c2f706903706acc7fe6df7960714c2321b6fc # main
+        uses: hashicorp/setup-packer@ccebc9ff384f18f44b9866a603d149286dcafcda # main
         with:
           version: ${{ needs.plan.outputs.packer }}
 
@@ -249,7 +249,7 @@ jobs:
         run: pip install ansible jmespath
 
       - name: Setup `packer`
-        uses: hashicorp/setup-packer@c94c2f706903706acc7fe6df7960714c2321b6fc # main
+        uses: hashicorp/setup-packer@ccebc9ff384f18f44b9866a603d149286dcafcda # main
         with:
           version: ${{ needs.plan.outputs.packer }}
 
@@ -355,7 +355,7 @@ jobs:
         run: pip install ansible jmespath
 
       - name: Setup `packer`
-        uses: hashicorp/setup-packer@c94c2f706903706acc7fe6df7960714c2321b6fc # main
+        uses: hashicorp/setup-packer@ccebc9ff384f18f44b9866a603d149286dcafcda # main
         with:
           version: ${{ needs.plan.outputs.packer }}
 
