@@ -7,14 +7,14 @@ AWS_CLI=$(which aws)
 #PACKER_LOG=1
 
 function usage {
-  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --copy-regions [true|false] --profile AWS_PROFILE --latest [true|false] [--help]"
+  echo "usage: $0 --java-major MAJOR --java-version VERSION --graalvm-jdk-version VERSION --graalvm-version VERSION --copy-regions [true|false] [--profile AWS_PROFILE] --latest [true|false] [--help]"
   echo "   "
   echo "  --java-major             : Java major version"
   echo "  --java-version           : Java version"
   echo "  --graalvm-jdk-version    : GraalVM jdk version"
   echo "  --graalvm-version        : GraalVM version"
   echo "  --copy-regions           : true or false"
-  echo "  --profile                : AWS Profile"
+  echo "  --profile                : AWS profile (optional, default: the AWS_* environment variables)"
   echo "  --latest                 : Want latest ?"
   echo "  --help                   : This message"
 }
@@ -64,7 +64,7 @@ function parse_args {
   done
 
   # Validate required args
-  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${aws_profile}" || -z "${latest}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" || -z "${java_version}" ]]; then
+  if [[ -z "${java_major}" || -z "${copy_regions}" || -z "${latest}" || -z "${graalvm_version}" || -z "${graalvm_jdk_version}" || -z "${java_version}" ]]; then
     echo "Invalid arguments"
     usage
     exit 1
@@ -80,7 +80,7 @@ function run {
   build_id=$(date +%s | sha1sum | cut -c -4)
 
   log info "Build Gatling Enterprise Injector arm64 (build_id: $build_id)"
-  log info "AWS profile: $aws_profile"
+  log info "AWS profile: ${aws_profile:-none (environment)}"
 
   copy_regions_list="[]"
   if [ "${copy_regions}" == "true" ]; then
@@ -100,7 +100,7 @@ function run {
   log info "AMI description: $ami_description"
 
   $PACKER build \
-    -var "aws_profile=${aws_profile}" \
+    -var "aws_profile=${aws_profile:-}" \
     -var "build_id=${build_id}" \
     -var "java_major=${java_major}" \
     -var "java_version=${java_version}" \

@@ -176,14 +176,11 @@ jobs:
         env:
           SCRIPT: ${{ matrix.image.script }}
           OPTIONS: ${{ matrix.image.options }}
-          BUILD: ${{ matrix.image.build }}
         run: |
           read -ra options <<<"$OPTIONS"
-          # same fixed options as the per-image workflows: --profile only for the GraalVM builds
+          # no --profile: Packer takes the credentials of the role from the AWS_* environment
+          # variables (a profile needs a ~/.aws/config, absent from the runner)
           options+=(--copy-regions true)
-          if [ "$BUILD" != "zulu" ]; then
-            options+=(--profile default)
-          fi
           ./"$SCRIPT" "${options[@]}" | tee build.log
 
           # Packer lists the AMI of each region at the end: "eu-west-3: ami-..."
