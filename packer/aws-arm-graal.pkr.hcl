@@ -97,7 +97,8 @@ source "amazon-ebs" "arm64" {
   ssh_interface = "public_ip"
   ssh_username  = "ec2-user"
 
-  profile = "${var.aws_profile}"
+  # no profile: credentials from the AWS_* environment variables (GitHub OIDC)
+  profile = var.aws_profile != "" ? var.aws_profile : null
 
   tags = {
     Name              = replace("Gatling Enterprise Injector arm64 GraalVM ${var.graalvm_version} (${var.build_id})", "+", "-")
